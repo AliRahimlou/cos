@@ -38,14 +38,13 @@ export default async function ManagerDashboardPage() {
           <div className="pointer-events-none absolute inset-0 glass-highlight" />
           <CardContent className="relative space-y-6 p-7">
             <div>
-              <p className="text-sm text-muted-foreground">Manager Console</p>
+              <p className="text-sm text-muted-foreground">COS Leadership View</p>
               <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
                 Team onboarding performance at a glance
               </h2>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
-                This dashboard is now backed by the shared portal store, so user assignment changes,
-                resets, assessment attempts, and completion state all reflect across learner and
-                manager routes.
+                Review completion, identify coaching opportunities, and keep every learner moving
+                through onboarding with clear operational visibility.
               </p>
             </div>
 

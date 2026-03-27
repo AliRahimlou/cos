@@ -153,11 +153,11 @@ export function AppSidebar({
         {!collapsed ? (
           <div className="relative mt-8 rounded-3xl border border-[var(--glass-border)] bg-foreground/5 p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-              Portal Status
+              COS Platform
             </p>
             <p className="mt-2 text-sm leading-6 text-foreground/80">
-              Protected deck content, role-aware dashboards, and shared progress tracking are live
-              in one shell.
+              Onboarding, certifications, team reporting, and program management live in one COS
+              learning experience.
             </p>
           </div>
         ) : null}

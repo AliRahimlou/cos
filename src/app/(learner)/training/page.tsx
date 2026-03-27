@@ -32,8 +32,8 @@ export default async function TrainingPage() {
             </h2>
             <p className="mt-3 max-w-4xl text-sm leading-7 text-muted-foreground">
               {context.courseRecord.protected
-                ? "This preserved PPTX-derived program keeps its source-slide traceability while running inside the routed app shell."
-                : "This manager-authored program uses the same typed course schema, routing model, and progress engine as the protected sales content."}
+                ? "This course is part of the core COS learning library and includes lesson content, quizzes, and final progress tracking."
+                : "This course was added for your department and follows the same COS learning standards, structure, and progress tracking."}
             </p>
           </div>
           <Link

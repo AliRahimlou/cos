@@ -10,7 +10,7 @@ export default async function LearnerLayout({
     <AppShell
       user={user}
       title="Sales Rep Onboarding"
-      description="Move through the COS onboarding program from your dashboard, finish lessons in sequence, and track quiz and final assessment performance in one routed learner workspace."
+      description="Complete your assigned COS learning path, track certification progress, and move through each lesson with clear next steps."
     >
       {children}
     </AppShell>

@@ -23,15 +23,15 @@ export default async function DashboardPage() {
 
   if (!summary.assigned || !summary.enrollment) {
     return (
-      <Card className="rounded-[2rem]">
-        <CardHeader>
-          <CardTitle>No onboarding assignment yet</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
-          <p>
-            Your learner account is active, but no onboarding program is currently assigned. A
-            manager can assign one from the Users screen.
-          </p>
+        <Card className="rounded-[2rem]">
+          <CardHeader>
+            <CardTitle>No onboarding assignment yet</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
+            <p>
+              Your account is active, but no learning path is currently assigned. Your manager can
+              assign the right onboarding program when you are ready to begin.
+            </p>
           <Link
             href="/results"
             className={cn(buttonVariants({ variant: "outline" }), "rounded-2xl")}
@@ -55,8 +55,8 @@ export default async function DashboardPage() {
                 {summary.courseTitle}
               </h2>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
-                Continue the {summary.courseDepartment} onboarding path, keep quiz performance on
-                track, and move through the preserved content model in a routed learning flow.
+                Continue your {summary.courseDepartment} learning path, keep quiz performance on
+                track, and stay on pace for completion and certification.
               </p>
             </div>
 
@@ -163,8 +163,7 @@ export default async function DashboardPage() {
               ))
             ) : (
               <p className="text-sm leading-6 text-muted-foreground">
-                No tracked activity yet. Start the first lesson to create a progress trail in the
-                shared onboarding store.
+                No activity yet. Start the first lesson to begin building your learning history.
               </p>
             )}
           </CardContent>

@@ -49,7 +49,7 @@ export function LessonScreen({
             <SourceSlideBadges sourceSlides={lesson.sourceSlides} />
           ) : (
             <Badge variant="outline" className="rounded-full border-[var(--glass-border)] bg-foreground/5 px-3 py-1 text-foreground">
-              Manager-authored
+              Custom lesson
             </Badge>
           )}
           <Badge

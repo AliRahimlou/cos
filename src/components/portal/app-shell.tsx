@@ -29,7 +29,7 @@ export async function AppShell({ user, title, description, children }: AppShellP
         <AppSidebar
           initialCollapsed={initialCollapsed}
           navItems={navItems}
-          roleLabel={user.role === "manager" ? "Manager Console" : "Learner Workspace"}
+          roleLabel={user.role === "manager" ? "Team Dashboard" : "Learning Portal"}
         />
 
         <div className="min-w-0 flex-1">

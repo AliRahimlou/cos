@@ -30,22 +30,22 @@ export function LoginForm({ initialTheme }: LoginFormProps) {
             <ThemeToggle initialTheme={initialTheme} />
           </div>
           <Badge className="mb-4 rounded-full border border-[var(--glass-border)] bg-foreground/10 px-4 py-1 text-foreground hover:bg-foreground/15">
-            Internal Onboarding + Training
+            Creative Office Solutions
           </Badge>
           <h1 className="max-w-3xl text-4xl font-semibold leading-tight text-foreground md:text-6xl">
-            The COS onboarding app with real routing, dashboards, and manager oversight.
+            Welcome to the COS learning and onboarding portal.
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Learners land on a real overview instead of a modules-only page. Managers get team
-            analytics, user controls, and shared progress visibility backed by a server store.
+            Train new hires, track certifications, and manage team progress across every COS
+            department in one secure workspace.
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {[
-              "Learner dashboard + routed training flow",
-              "Module quizzes + final certification test",
-              "Manager analytics, assignments, and resets",
-              "PPTX-derived content model with slide traceability",
+              "Role-based dashboards for learners and managers",
+              "Course modules, quizzes, and final certification",
+              "Team analytics, assignments, and access controls",
+              "Department learning paths built for COS operations",
             ].map((item) => (
               <div
                 key={item}
@@ -60,7 +60,7 @@ export function LoginForm({ initialTheme }: LoginFormProps) {
         <Card className="rounded-[2rem] shadow-[var(--glass-shadow-lg)]">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between gap-3">
-              <CardTitle className="text-2xl">Employee Login</CardTitle>
+              <CardTitle className="text-2xl">Sign In</CardTitle>
               <div className="hidden lg:block">
                 <ThemeToggle initialTheme={initialTheme} />
               </div>
@@ -75,7 +75,7 @@ export function LoginForm({ initialTheme }: LoginFormProps) {
                 <Input
                   id="email"
                   name="email"
-                  placeholder="name@cos.local"
+                  placeholder="you@creativeofficesolutions.com"
                   className="h-12 rounded-2xl"
                   autoComplete="email"
                   required
@@ -113,29 +113,33 @@ export function LoginForm({ initialTheme }: LoginFormProps) {
               <div className="glass-surface rounded-3xl p-4">
                 <div className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
                   <UserRound className="h-4 w-4" />
-                  Learner demo
+                  Learning access
                 </div>
-                <p className="text-sm text-muted-foreground">`learner@cos.local`</p>
-                <p className="text-sm text-muted-foreground">`learner123`</p>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  Sign in with your COS work email and password to access assigned training,
+                  quizzes, and certification progress.
+                </p>
               </div>
               <div className="glass-surface rounded-3xl p-4">
                 <div className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
                   <ShieldCheck className="h-4 w-4" />
-                  Manager demo
+                  Manager access
                 </div>
-                <p className="text-sm text-muted-foreground">`manager@cos.local`</p>
-                <p className="text-sm text-muted-foreground">`manager123`</p>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  Managers can review team progress, unlock assessments, assign programs, and
+                  oversee onboarding performance.
+                </p>
               </div>
             </div>
 
             <div className="glass-surface-strong rounded-3xl p-5">
               <div className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
                 <Building2 className="h-4 w-4" />
-                Seeded demo environment
+                Need access?
               </div>
               <p className="text-sm leading-6 text-muted-foreground">
-                The repo now seeds a shared local portal store with manager and learner accounts so
-                dashboards, analytics, and progress controls are reachable without external setup.
+                Contact your COS administrator or team lead if you need onboarding access, a role
+                update, or a department assignment.
               </p>
             </div>
           </CardContent>

@@ -9,8 +9,8 @@ export default async function ManagerLayout({
   return (
     <AppShell
       user={user}
-      title="Manager Console"
-      description="Review learner progress, identify coaching needs, control assignments and attempts, and inspect the course content map that now powers the onboarding app."
+      title="COS Manager Dashboard"
+      description="Review onboarding performance, support coaching conversations, manage access, and oversee learning across your team."
     >
       {children}
     </AppShell>

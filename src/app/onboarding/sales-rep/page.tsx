@@ -6,8 +6,7 @@ import { getSessionUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Sales Rep Onboarding",
-  description:
-    "Legacy onboarding entrypoint redirected into the routed portal experience.",
+  description: "Sales rep onboarding for Creative Office Solutions.",
 };
 
 export default async function SalesRepOnboardingPage() {

@@ -147,13 +147,12 @@ export default async function ContentPage() {
 
       <Card className="rounded-[2rem]">
         <CardHeader>
-          <CardTitle>Program Catalog</CardTitle>
+          <CardTitle>Program Library</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
           <p>
-            Protected PPTX-derived programs are preserved as immutable source content. Manager-added
-            programs and modules are stored as extensions around that content instead of replacing
-            it.
+            Manage the COS learning library, add department programs, and expand course offerings
+            without disrupting active onboarding paths.
           </p>
         </CardContent>
       </Card>
@@ -165,10 +164,10 @@ export default async function ContentPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <Badge className="rounded-full px-3 py-1">{course.department}</Badge>
                 <Badge variant="secondary" className="rounded-full px-3 py-1">
-                  {course.protected ? "Protected source" : "Manager created"}
+                  {course.protected ? "Core program" : "Custom program"}
                 </Badge>
                 <Badge variant="outline" className="rounded-full px-3 py-1">
-                  {course.source}
+                  {course.protected ? "COS Standard" : "Department"}
                 </Badge>
               </div>
               <CardTitle className="text-2xl">{course.course.title}</CardTitle>
@@ -190,7 +189,7 @@ export default async function ContentPage() {
                 </div>
                 <div className="rounded-3xl border border-[var(--glass-border)] bg-foreground/5 p-4">
                   <p className="font-medium text-foreground">Source</p>
-                  <p className="text-muted-foreground">{course.protected ? course.extractionArtifact ?? "Protected content registry" : "Manager content store"}</p>
+                  <p className="text-muted-foreground">{course.protected ? "COS learning library" : "Department-managed content"}</p>
                 </div>
               </div>
 
@@ -206,7 +205,7 @@ export default async function ContentPage() {
                         <SourceSlideBadges sourceSlides={module.sourceSlides} />
                       ) : (
                         <Badge variant="outline" className="rounded-full">
-                          Manager-authored
+                          Custom module
                         </Badge>
                       )}
                     </div>

@@ -47,7 +47,7 @@ export default async function ModulePage({
             <SourceSlideBadges sourceSlides={courseModule.sourceSlides} />
           ) : (
             <Badge variant="outline" className="rounded-full px-3 py-1">
-              Manager-authored
+              Custom module
             </Badge>
           )}
           {moduleSummary.locked ? (
