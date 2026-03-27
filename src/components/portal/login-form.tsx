@@ -1,0 +1,132 @@
+"use client";
+
+import { useActionState } from "react";
+import { ArrowRight, Building2, ShieldCheck, UserRound } from "lucide-react";
+
+import { loginAction, type LoginActionState } from "@/app/actions/auth";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+
+const initialState: LoginActionState = {
+  error: null,
+};
+
+export function LoginForm() {
+  const [state, formAction, pending] = useActionState(loginAction, initialState);
+
+  return (
+    <div className="min-h-screen bg-slate-950 p-6 md:p-10">
+      <div className="mx-auto grid min-h-[85vh] max-w-6xl items-center gap-8 lg:grid-cols-2">
+        <div>
+          <Badge className="mb-4 rounded-full bg-white/10 px-4 py-1 text-white hover:bg-white/10">
+            Internal Onboarding + Training
+          </Badge>
+          <h1 className="max-w-3xl text-4xl font-semibold leading-tight text-white md:text-6xl">
+            The COS onboarding app with real routing, dashboards, and manager oversight.
+          </h1>
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300">
+            Learners land on a real overview instead of a modules-only page. Managers get team
+            analytics, user controls, and shared progress visibility backed by a server store.
+          </p>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            {[
+              "Learner dashboard + routed training flow",
+              "Module quizzes + final certification test",
+              "Manager analytics, assignments, and resets",
+              "PPTX-derived content model with slide traceability",
+            ].map((item) => (
+              <div
+                key={item}
+                className="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <Card className="rounded-[2rem] border-0 shadow-2xl">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-2xl">Employee Login</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <form action={formAction} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium text-slate-700">
+                  Work email
+                </label>
+                <Input
+                  id="email"
+                  name="email"
+                  placeholder="name@cos.local"
+                  className="h-12 rounded-2xl"
+                  autoComplete="email"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium text-slate-700">
+                  Password
+                </label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter password"
+                  className="h-12 rounded-2xl"
+                  autoComplete="current-password"
+                  required
+                />
+              </div>
+
+              {state.error ? (
+                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {state.error}
+                </div>
+              ) : null}
+
+              <Button type="submit" disabled={pending} className="h-12 w-full rounded-2xl text-base">
+                {pending ? "Signing in..." : "Enter Portal"}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </form>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-900">
+                  <UserRound className="h-4 w-4" />
+                  Learner demo
+                </div>
+                <p className="text-sm text-slate-600">`learner@cos.local`</p>
+                <p className="text-sm text-slate-600">`learner123`</p>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-900">
+                  <ShieldCheck className="h-4 w-4" />
+                  Manager demo
+                </div>
+                <p className="text-sm text-slate-600">`manager@cos.local`</p>
+                <p className="text-sm text-slate-600">`manager123`</p>
+              </div>
+            </div>
+
+            <div className="rounded-3xl bg-slate-950 p-5 text-white">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+                <Building2 className="h-4 w-4" />
+                Seeded demo environment
+              </div>
+              <p className="text-sm leading-6 text-slate-300">
+                The repo now seeds a shared local portal store with manager and learner accounts so
+                dashboards, analytics, and progress controls are reachable without external setup.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
