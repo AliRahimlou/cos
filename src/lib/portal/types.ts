@@ -1,5 +1,5 @@
 import type { UserRole } from "@/lib/auth/types";
-import type { CourseProgress } from "@/lib/onboarding/types";
+import type { Course, CourseProgress, Module } from "@/lib/onboarding/types";
 
 export type PortalUser = {
   id: string;
@@ -10,6 +10,7 @@ export type PortalUser = {
   title: string;
   department: string;
   active: boolean;
+  activeCourseId: string | null;
 };
 
 export type PublicUser = Omit<PortalUser, "password">;
@@ -18,11 +19,14 @@ export type PortalActivityType =
   | "lesson_completed"
   | "assessment_submitted"
   | "assignment_updated"
+  | "active_course_updated"
   | "course_locked"
   | "module_lock_updated"
   | "final_override_updated"
   | "manager_completion_updated"
-  | "progress_reset";
+  | "progress_reset"
+  | "course_created"
+  | "module_created";
 
 export type PortalActivity = {
   id: string;
@@ -52,8 +56,31 @@ export type CourseEnrollment = {
   activity: PortalActivity[];
 };
 
+export type ManagedCourseRecord = {
+  courseId: string;
+  department: string;
+  source: "pptx" | "manager";
+  protected: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deckPath?: string | null;
+  extractionArtifact?: string | null;
+  notesPath?: string | null;
+  course: Course;
+};
+
+export type CourseModuleExtension = {
+  courseId: string;
+  createdAt: string;
+  updatedAt: string;
+  createdByUserId: string;
+  modules: Module[];
+};
+
 export type PortalState = {
-  version: 1;
+  version: 2;
   users: PortalUser[];
   enrollments: CourseEnrollment[];
+  customCourses: ManagedCourseRecord[];
+  courseModuleExtensions: CourseModuleExtension[];
 };

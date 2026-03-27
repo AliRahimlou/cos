@@ -38,6 +38,7 @@ export default async function LessonPage({
 
   return (
     <LessonScreen
+      courseId={course.id}
       module={courseModule}
       lesson={lessonMatch.lesson}
       isComplete={isComplete}

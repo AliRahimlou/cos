@@ -1,4 +1,3 @@
-import { salesRepOnboardingCourse } from "@/content/onboarding/sales-rep/course";
 import {
   getAssessmentAttempts,
   getBestAssessmentAttempt,
@@ -6,10 +5,9 @@ import {
   getModuleStatus,
   getResumeTarget,
 } from "@/lib/onboarding/progress";
+import type { Course } from "@/lib/onboarding/types";
 
 import type { CourseEnrollment, PortalActivity, PublicUser } from "./types";
-
-const course = salesRepOnboardingCourse;
 
 export type LearnerModuleSummary = {
   id: string;
@@ -25,6 +23,10 @@ export type LearnerModuleSummary = {
 
 export type LearnerSummary = {
   user: PublicUser;
+  courseId: string;
+  courseTitle: string;
+  courseDepartment: string;
+  protectedCourse: boolean;
   enrollment: CourseEnrollment | null;
   completionPercent: number;
   completedModules: number;
@@ -66,7 +68,7 @@ function average(numbers: number[]) {
   return Math.round(numbers.reduce((sum, value) => sum + value, 0) / numbers.length);
 }
 
-function getQuizAverage(enrollment: CourseEnrollment | null) {
+function getQuizAverage(course: Course, enrollment: CourseEnrollment | null) {
   if (!enrollment) {
     return null;
   }
@@ -83,15 +85,17 @@ function getQuizAverage(enrollment: CourseEnrollment | null) {
   return scores.length > 0 ? average(scores) : null;
 }
 
-function getFinalScore(enrollment: CourseEnrollment | null) {
+function getFinalScore(course: Course, enrollment: CourseEnrollment | null) {
   if (!enrollment || !course.finalAssessment) {
     return null;
   }
 
-  return getBestAssessmentAttempt(enrollment.progress, course.finalAssessment.id)?.scorePercent ?? null;
+  return (
+    getBestAssessmentAttempt(enrollment.progress, course.finalAssessment.id)?.scorePercent ?? null
+  );
 }
 
-function getNextHref(enrollment: CourseEnrollment | null) {
+function getNextHref(course: Course, enrollment: CourseEnrollment | null) {
   if (!enrollment || !enrollment.assigned || enrollment.locked) {
     return null;
   }
@@ -113,13 +117,17 @@ function getNextHref(enrollment: CourseEnrollment | null) {
   return "/results";
 }
 
-export function buildLearnerSummary(
-  user: PublicUser,
-  enrollment: CourseEnrollment | null,
-): LearnerSummary {
+export function buildLearnerSummary(input: {
+  course: Course;
+  department: string;
+  protectedCourse: boolean;
+  user: PublicUser;
+  enrollment: CourseEnrollment | null;
+}): LearnerSummary {
+  const { course, department, protectedCourse, user, enrollment } = input;
   const stats = enrollment ? getCourseStats(course, enrollment.progress) : null;
-  const quizAverage = getQuizAverage(enrollment);
-  const finalScore = getFinalScore(enrollment);
+  const quizAverage = getQuizAverage(course, enrollment);
+  const finalScore = getFinalScore(course, enrollment);
   const modules = course.modules.map((module) => {
     const status = enrollment
       ? getModuleStatus(module, enrollment.progress)
@@ -148,6 +156,10 @@ export function buildLearnerSummary(
   const assigned = enrollment?.assigned ?? false;
   const locked = enrollment?.locked ?? false;
   const managerMarkedComplete = enrollment?.managerMarkedComplete ?? null;
+  const autoCompletedWithoutFinal =
+    !course.finalAssessment &&
+    course.modules.length > 0 &&
+    (stats?.completedModules ?? 0) === course.modules.length;
   const completionPercent = managerMarkedComplete
     ? 100
     : stats?.completionPercent ?? 0;
@@ -158,15 +170,21 @@ export function buildLearnerSummary(
   const finalUnlocked = Boolean(
     enrollment &&
       (enrollment.finalAssessmentUnlocked ||
+        !course.finalAssessment ||
         course.modules.every((module) => getModuleStatus(module, enrollment.progress).completed)),
+  );
+
+  const failedFinalAttempt = Boolean(
+    course.finalAssessment &&
+      getAssessmentAttempts(enrollment?.progress ?? createEmptyProgress(course.id), course.finalAssessment.id).some(
+        (attempt) => !attempt.passed,
+      ),
   );
 
   const needsCoaching = Boolean(
     assigned &&
       !managerMarkedComplete &&
-      ((quizAverage !== null && quizAverage < 80) ||
-        (course.finalAssessment &&
-          getAssessmentAttempts(enrollment?.progress ?? { courseId: course.id, startedAt: null, updatedAt: null, completedLessonIds: [], attempts: [] }, course.finalAssessment.id).some((attempt) => !attempt.passed))),
+      ((quizAverage !== null && quizAverage < 80) || failedFinalAttempt),
   );
 
   let status = "Not started";
@@ -175,7 +193,7 @@ export function buildLearnerSummary(
     status = "Not assigned";
   } else if (locked) {
     status = "Locked";
-  } else if (managerMarkedComplete || stats?.finalAssessmentPassed) {
+  } else if (managerMarkedComplete || stats?.finalAssessmentPassed || autoCompletedWithoutFinal) {
     status = "Completed";
   } else if (needsCoaching) {
     status = "Needs coaching";
@@ -187,6 +205,10 @@ export function buildLearnerSummary(
 
   return {
     user,
+    courseId: course.id,
+    courseTitle: course.title,
+    courseDepartment: department,
+    protectedCourse,
     enrollment,
     completionPercent,
     completedModules,
@@ -199,11 +221,21 @@ export function buildLearnerSummary(
     locked,
     managerMarkedComplete,
     needsCoaching,
-    nextHref: getNextHref(enrollment),
+    nextHref: getNextHref(course, enrollment),
     lastActivityAt: enrollment?.activity[0]?.createdAt ?? enrollment?.progress.updatedAt ?? null,
     recentActivity: enrollment?.activity.slice(0, 6) ?? [],
     finalUnlocked,
     modules,
+  };
+}
+
+function createEmptyProgress(courseId: string) {
+  return {
+    courseId,
+    startedAt: null,
+    updatedAt: null,
+    completedLessonIds: [],
+    attempts: [],
   };
 }
 

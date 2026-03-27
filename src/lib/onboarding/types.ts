@@ -11,6 +11,13 @@ export type ContentBlock =
       width?: number;
       height?: number;
     }
+  | {
+      type: "video";
+      url: string;
+      title: string;
+      caption?: string;
+      poster?: string;
+    }
   | { type: "quote"; text: string }
   | { type: "checklist"; items: string[] };
 

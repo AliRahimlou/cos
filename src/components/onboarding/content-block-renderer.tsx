@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import type { ContentBlock } from "@/lib/onboarding/types";
+import { getEmbeddedVideoSource } from "@/lib/onboarding/video";
 
 function renderTextWithLinks(text: string) {
   const segments = text.split(/(https?:\/\/[^\s]+)/g);
@@ -63,6 +64,54 @@ function ContentImage({
   );
 }
 
+function ContentVideo({
+  url,
+  title,
+  caption,
+  poster,
+}: Extract<ContentBlock, { type: "video" }>) {
+  const source = getEmbeddedVideoSource(url);
+
+  if (!source) {
+    return (
+      <div className="rounded-3xl border border-dashed border-border bg-muted/40 p-6 text-sm text-muted-foreground">
+        Video referenced in the source content.
+      </div>
+    );
+  }
+
+  return (
+    <figure className="overflow-hidden rounded-3xl border border-border bg-card">
+      <div className="aspect-video bg-muted/40">
+        {source.provider === "youtube" ? (
+          <iframe
+            src={source.embedUrl}
+            title={title}
+            className="h-full w-full"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+        ) : (
+          <video
+            src={source.src}
+            title={title}
+            poster={poster}
+            controls
+            preload="metadata"
+            className="h-full w-full"
+          />
+        )}
+      </div>
+      <figcaption className="border-t border-border px-5 py-4 text-sm text-muted-foreground">
+        <div className="font-medium text-foreground">{title}</div>
+        {caption ? <div className="mt-1">{renderTextWithLinks(caption)}</div> : null}
+      </figcaption>
+    </figure>
+  );
+}
+
 export function ContentBlockRenderer({ blocks }: { blocks: ContentBlock[] }) {
   return (
     <div className="space-y-5">
@@ -92,10 +141,10 @@ export function ContentBlockRenderer({ blocks }: { blocks: ContentBlock[] }) {
 
         if (block.type === "checklist") {
           return (
-            <ul key={key} className="space-y-3 rounded-3xl border border-border bg-emerald-50/70 px-5 py-5 text-sm text-emerald-950">
+            <ul key={key} className="space-y-3 rounded-3xl border border-[var(--glass-border)] bg-foreground/5 px-5 py-5 text-sm text-foreground/80">
               {block.items.map((item) => (
                 <li key={item} className="flex gap-3 leading-7">
-                  <span className="mt-1 inline-flex size-5 items-center justify-center rounded-full bg-emerald-600 text-[11px] font-semibold text-white">
+                  <span className="mt-1 inline-flex size-5 items-center justify-center rounded-full bg-foreground text-[11px] font-semibold text-background">
                     ✓
                   </span>
                   <span>{renderTextWithLinks(item)}</span>
@@ -107,9 +156,9 @@ export function ContentBlockRenderer({ blocks }: { blocks: ContentBlock[] }) {
 
         if (block.type === "callout") {
           return (
-            <div key={key} className="rounded-3xl border border-sky-200 bg-sky-50 px-5 py-5 text-sm text-sky-950">
+            <div key={key} className="rounded-3xl border border-[var(--glass-border)] bg-foreground/5 px-5 py-5 text-sm text-foreground/80">
               {block.title ? (
-                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   {block.title}
                 </p>
               ) : null}
@@ -149,6 +198,10 @@ export function ContentBlockRenderer({ blocks }: { blocks: ContentBlock[] }) {
 
         if (block.type === "image") {
           return <ContentImage key={key} {...block} />;
+        }
+
+        if (block.type === "video") {
+          return <ContentVideo key={key} {...block} />;
         }
 
         if (block.type === "quote") {

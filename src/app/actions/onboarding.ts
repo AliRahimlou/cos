@@ -6,9 +6,9 @@ import { requireSessionUser } from "@/lib/auth/session";
 import { markLessonCompleteForUser, submitAssessmentForUser } from "@/lib/portal/store";
 import type { QuestionResponse } from "@/lib/onboarding/types";
 
-export async function completeLessonAction(input: { lessonId: string }) {
+export async function completeLessonAction(input: { courseId: string; lessonId: string }) {
   const user = await requireSessionUser("learner");
-  await markLessonCompleteForUser(user.id, input.lessonId);
+  await markLessonCompleteForUser(user.id, input.courseId, input.lessonId);
   revalidatePath("/dashboard");
   revalidatePath("/training");
   revalidatePath("/quizzes");
@@ -20,6 +20,7 @@ export async function completeLessonAction(input: { lessonId: string }) {
 }
 
 export async function submitAssessmentAction(input: {
+  courseId: string;
   assessmentId: string;
   moduleId?: string;
   answers: Record<string, QuestionResponse>;
@@ -27,6 +28,7 @@ export async function submitAssessmentAction(input: {
   const user = await requireSessionUser("learner");
   const result = await submitAssessmentForUser({
     userId: user.id,
+    courseId: input.courseId,
     assessmentId: input.assessmentId,
     moduleId: input.moduleId,
     answers: input.answers,

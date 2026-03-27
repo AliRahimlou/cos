@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Award, RotateCcw } from "lucide-react";
 
+import { CompletionCelebration } from "@/components/portal/completion-celebration";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { requireSessionUser } from "@/lib/auth/session";
@@ -50,54 +51,56 @@ export default async function ResultsPage({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[2rem] bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 px-6 py-8 text-white shadow-2xl">
-        <div className="flex flex-wrap items-center gap-3">
-          <Badge className="rounded-full bg-white/12 px-4 py-1 text-white hover:bg-white/12">
+      <section className="glass-surface-strong relative overflow-hidden rounded-[2rem] px-6 py-8 shadow-[var(--glass-shadow-lg)]">
+        {summary.status === "Completed" ? <CompletionCelebration /> : null}
+        <div className="pointer-events-none absolute inset-0 glass-highlight" />
+        <div className="relative flex flex-wrap items-center gap-3">
+          <Badge className="rounded-full border border-[var(--glass-border)] bg-foreground/10 px-4 py-1 text-foreground hover:bg-foreground/15">
             Results
           </Badge>
           {summary.status === "Completed" ? (
-            <Badge variant="outline" className="rounded-full border-white/20 bg-white/8 px-3 py-1 text-white">
-              Certified
+            <Badge variant="outline" className="rounded-full border-[var(--glass-border)] bg-foreground/5 px-3 py-1 text-foreground">
+              {course.finalAssessment ? "Certified" : "Completed"}
             </Badge>
           ) : null}
         </div>
-        <h2 className="mt-4 text-4xl font-semibold tracking-tight">
+        <h2 className="relative mt-4 text-4xl font-semibold tracking-tight text-foreground">
           Assessment results and completion record
         </h2>
-        <p className="mt-4 max-w-4xl text-base leading-8 text-white/80">
-          Review the latest scored attempt, track your course completion percentage, and retake any
-          module quiz or the final certification assessment as needed.
+        <p className="relative mt-4 max-w-4xl text-base leading-8 text-muted-foreground">
+          Review the latest scored attempt, track your program completion percentage, and retake any
+          graded assessments that are configured for this onboarding path.
         </p>
       </section>
 
       <section className="grid gap-6 md:grid-cols-3">
-        <Card className="rounded-[2rem] border-0 shadow-lg">
+        <Card className="rounded-[2rem]">
           <CardContent className="p-6">
-            <p className="text-sm text-slate-500">Course Completion</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-950">{summary.completionPercent}%</p>
+            <p className="text-sm text-muted-foreground">Course Completion</p>
+            <p className="mt-2 text-3xl font-semibold text-foreground">{summary.completionPercent}%</p>
             <div className="mt-4">
               <Progress value={summary.completionPercent} className="h-2" />
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-[2rem] border-0 shadow-lg">
+        <Card className="rounded-[2rem]">
           <CardContent className="p-6">
-            <p className="text-sm text-slate-500">Quiz Average</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-950">{summary.quizAverage ?? 0}%</p>
+            <p className="text-sm text-muted-foreground">Quiz Average</p>
+            <p className="mt-2 text-3xl font-semibold text-foreground">{summary.quizAverage ?? 0}%</p>
           </CardContent>
         </Card>
-        <Card className="rounded-[2rem] border-0 shadow-lg">
+        <Card className="rounded-[2rem]">
           <CardContent className="p-6">
-            <p className="text-sm text-slate-500">Final Assessment</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-950">
-              {summary.finalScore ?? "Not taken"}
+            <p className="text-sm text-muted-foreground">Final Assessment</p>
+            <p className="mt-2 text-3xl font-semibold text-foreground">
+              {course.finalAssessment ? summary.finalScore ?? "Not taken" : "Not configured"}
             </p>
           </CardContent>
         </Card>
       </section>
 
       {assessment && latestAttempt && latestOutcome ? (
-        <Card className="rounded-[2rem] border-0 shadow-lg">
+        <Card className="rounded-[2rem]">
           <CardHeader className="space-y-3">
             <div className="flex flex-wrap items-center gap-3">
               <Badge className="rounded-full px-3 py-1">
@@ -110,7 +113,7 @@ export default async function ResultsPage({
             <CardTitle className="text-2xl">
               Latest Attempt: {assessment.title}
             </CardTitle>
-            <p className="text-sm leading-6 text-slate-600">
+            <p className="text-sm leading-6 text-muted-foreground">
               Submitted on {new Date(latestAttempt.completedAt).toLocaleString()}.
             </p>
           </CardHeader>
@@ -121,9 +124,9 @@ export default async function ResultsPage({
               );
 
               return (
-                <div key={question.id} className="rounded-3xl border border-slate-200 px-5 py-4">
-                  <p className="text-sm font-medium text-slate-950">{question.prompt}</p>
-                  <p className="mt-2 text-sm text-slate-600">{question.explanation}</p>
+                <div key={question.id} className="rounded-3xl border border-[var(--glass-border)] px-5 py-4">
+                  <p className="text-sm font-medium text-foreground">{question.prompt}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{question.explanation}</p>
                   <div className="mt-3 flex flex-wrap items-center gap-3">
                     <Badge
                       variant={questionResult?.correct ? "default" : "secondary"}
@@ -159,17 +162,17 @@ export default async function ResultsPage({
       ) : null}
 
       <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <Card className="rounded-[2rem] border-0 shadow-lg">
+        <Card className="rounded-[2rem]">
           <CardHeader>
             <CardTitle>Module Status</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {summary.modules.map((module) => (
-              <div key={module.id} className="rounded-3xl border border-slate-200 px-5 py-4">
+              <div key={module.id} className="rounded-3xl border border-[var(--glass-border)] px-5 py-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h3 className="font-semibold text-slate-950">{module.title}</h3>
-                    <p className="text-sm text-slate-500">
+                    <h3 className="font-semibold text-foreground">{module.title}</h3>
+                    <p className="text-sm text-muted-foreground">
                       {module.completedLessons}/{module.totalLessons} lessons complete
                     </p>
                   </div>
@@ -182,26 +185,32 @@ export default async function ResultsPage({
           </CardContent>
         </Card>
 
-        <Card className="rounded-[2rem] border-0 shadow-lg">
+        <Card className="rounded-[2rem]">
           <CardHeader>
             <CardTitle>Certification Status</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-sm leading-6 text-slate-600">
-            <div className="rounded-3xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-950">
-              <div className="mb-2 flex items-center gap-2 font-medium">
+          <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
+            <div className="rounded-3xl border border-[var(--glass-border)] bg-foreground/5 p-4 text-foreground/80">
+              <div className="mb-2 flex items-center gap-2 font-medium text-foreground">
                 <Award className="h-4 w-4" />
                 Current state
               </div>
               <p>
                 {summary.status === "Completed"
                   ? "The onboarding course is complete. You can still retake assessments for review."
-                  : "Certification remains open. Finish incomplete modules and pass the final assessment to close the course."}
+                  : course.finalAssessment
+                    ? "Certification remains open. Finish incomplete modules and pass the final assessment to close the course."
+                    : "Completion remains open. Finish incomplete modules to close this program."}
               </p>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span>Best final score</span>
-                <span>{getBestAssessmentAttempt(enrollment.progress, course.finalAssessment?.id ?? "")?.scorePercent ?? "Not taken"}</span>
+                <span>
+                  {course.finalAssessment
+                    ? getBestAssessmentAttempt(enrollment.progress, course.finalAssessment.id)?.scorePercent ?? "Not taken"
+                    : "Not configured"}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Manager override</span>

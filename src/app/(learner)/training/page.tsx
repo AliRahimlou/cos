@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Lock, PlayCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { requireSessionUser } from "@/lib/auth/session";
@@ -22,16 +22,18 @@ export default async function TrainingPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[2rem] bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <section className="glass-surface-strong relative overflow-hidden rounded-[2rem] p-6">
+        <div className="pointer-events-none absolute inset-0 glass-highlight" />
+        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <Badge className="rounded-full px-3 py-1">Training Modules</Badge>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950">
-              Routed module flow built from the source deck
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
+              {course.title}
             </h2>
-            <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-600">
-              Each module is mapped to the normalized course model, carries source-slide metadata,
-              and links into dedicated lesson routes instead of a local-state modules screen.
+            <p className="mt-3 max-w-4xl text-sm leading-7 text-muted-foreground">
+              {context.courseRecord.protected
+                ? "This preserved PPTX-derived program keeps its source-slide traceability while running inside the routed app shell."
+                : "This manager-authored program uses the same typed course schema, routing model, and progress engine as the protected sales content."}
             </p>
           </div>
           <Link
@@ -55,20 +57,20 @@ export default async function TrainingPage() {
             : `/training/${module.id}`;
 
           return (
-            <Card key={module.id} className="rounded-[2rem] border-0 shadow-lg">
+            <Card key={module.id} className="rounded-[2rem]">
               <CardHeader className="space-y-3">
                 <div className="flex items-center justify-between gap-4">
                   <Badge variant="secondary" className="rounded-full px-3 py-1">
                     {module.estimatedMinutes} min
                   </Badge>
-                  <span className="text-sm text-slate-500">{moduleSummary.progressPercent}%</span>
+                  <span className="text-sm text-muted-foreground">{moduleSummary.progressPercent}%</span>
                 </div>
                 <CardTitle className="text-2xl">{module.title}</CardTitle>
-                <p className="text-sm leading-6 text-slate-600">{module.description}</p>
+                <p className="text-sm leading-6 text-muted-foreground">{module.description}</p>
               </CardHeader>
               <CardContent className="space-y-5">
                 <Progress value={moduleSummary.progressPercent} className="h-2" />
-                <div className="grid gap-2 text-sm text-slate-600">
+                <div className="grid gap-2 text-sm text-muted-foreground">
                   <div className="flex items-center justify-between">
                     <span>Lessons</span>
                     <span>
@@ -77,7 +79,7 @@ export default async function TrainingPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span>Quiz</span>
-                    <span>{moduleSummary.quizPassed ? "Passed" : "Pending"}</span>
+                    <span>{module.quiz ? (moduleSummary.quizPassed ? "Passed" : "Pending") : "Not configured"}</span>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3">

@@ -16,6 +16,7 @@ import type { Lesson, Module } from "@/lib/onboarding/types";
 import { cn } from "@/lib/utils";
 
 type LessonScreenProps = {
+  courseId: string;
   module: Module;
   lesson: Lesson;
   isComplete: boolean;
@@ -25,6 +26,7 @@ type LessonScreenProps = {
 };
 
 export function LessonScreen({
+  courseId,
   module,
   lesson,
   isComplete,
@@ -37,23 +39,30 @@ export function LessonScreen({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[2rem] bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 px-6 py-8 text-white shadow-2xl">
-        <div className="flex flex-wrap items-center gap-3">
-          <Badge className="rounded-full bg-white/12 px-4 py-1 text-white hover:bg-white/12">
+      <section className="glass-surface-strong relative overflow-hidden rounded-[2rem] px-6 py-8 shadow-[var(--glass-shadow-lg)]">
+        <div className="pointer-events-none absolute inset-0 glass-highlight" />
+        <div className="relative flex flex-wrap items-center gap-3">
+          <Badge className="rounded-full border border-[var(--glass-border)] bg-foreground/10 px-4 py-1 text-foreground hover:bg-foreground/15">
             {module.title}
           </Badge>
-          <SourceSlideBadges sourceSlides={lesson.sourceSlides} />
+          {lesson.sourceSlides.length ? (
+            <SourceSlideBadges sourceSlides={lesson.sourceSlides} />
+          ) : (
+            <Badge variant="outline" className="rounded-full border-[var(--glass-border)] bg-foreground/5 px-3 py-1 text-foreground">
+              Manager-authored
+            </Badge>
+          )}
           <Badge
             variant="outline"
-            className="rounded-full border-white/20 bg-white/8 px-3 py-1 text-white"
+            className="rounded-full border-[var(--glass-border)] bg-foreground/5 px-3 py-1 text-foreground"
           >
             {isComplete ? "Completed" : "In progress"}
           </Badge>
         </div>
 
-        <h2 className="mt-4 text-4xl font-semibold tracking-tight">{lesson.title}</h2>
+        <h2 className="relative mt-4 text-4xl font-semibold tracking-tight text-foreground">{lesson.title}</h2>
         {lesson.description ? (
-          <p className="mt-4 max-w-4xl text-base leading-8 text-white/80">
+          <p className="relative mt-4 max-w-4xl text-base leading-8 text-muted-foreground">
             {lesson.description}
           </p>
         ) : null}
@@ -61,7 +70,7 @@ export function LessonScreen({
 
       <div className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
         <div className="space-y-6">
-          <Card className="rounded-[2rem] border-0 shadow-lg">
+          <Card className="rounded-[2rem]">
             <CardHeader>
               <CardTitle className="text-xl">Lesson Content</CardTitle>
             </CardHeader>
@@ -79,20 +88,20 @@ export function LessonScreen({
         </div>
 
         <div className="space-y-6">
-          <Card className="rounded-[2rem] border-0 shadow-lg">
+          <Card className="rounded-[2rem]">
             <CardHeader>
               <CardTitle>Learning Objectives</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {lesson.objectives.map((objective) => (
-                <div key={objective} className="rounded-3xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                <div key={objective} className="rounded-3xl border border-[var(--glass-border)] bg-foreground/5 px-4 py-3 text-sm text-foreground/80">
                   {objective}
                 </div>
               ))}
             </CardContent>
           </Card>
 
-          <Card className="rounded-[2rem] border-0 shadow-lg">
+          <Card className="rounded-[2rem]">
             <CardHeader>
               <CardTitle>Key Takeaways</CardTitle>
             </CardHeader>
@@ -100,7 +109,7 @@ export function LessonScreen({
               {lesson.keyTakeaways.map((takeaway) => (
                 <div
                   key={takeaway}
-                  className="flex gap-3 rounded-3xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-950"
+                  className="flex gap-3 rounded-3xl border border-[var(--glass-border)] bg-foreground/5 px-4 py-3 text-sm text-foreground/80"
                 >
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
                   <span>{takeaway}</span>
@@ -109,7 +118,7 @@ export function LessonScreen({
             </CardContent>
           </Card>
 
-          <Card className="rounded-[2rem] border-0 shadow-lg">
+          <Card className="rounded-[2rem]">
             <CardHeader>
               <CardTitle>Lesson Actions</CardTitle>
             </CardHeader>
@@ -127,7 +136,7 @@ export function LessonScreen({
                   disabled={pending}
                   onClick={() =>
                     startTransition(async () => {
-                      await completeLessonAction({ lessonId: lesson.id });
+                      await completeLessonAction({ courseId, lessonId: lesson.id });
                       router.push(nextHref);
                       router.refresh();
                     })

@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Assessment } from "@/lib/onboarding/types";
 
 type AssessmentScreenProps = {
+  courseId: string;
   assessment: Assessment;
   assessmentType: "module_quiz" | "final_assessment";
   moduleId?: string;
@@ -20,6 +21,7 @@ type AssessmentScreenProps = {
 };
 
 export function AssessmentScreen({
+  courseId,
   assessment,
   assessmentType,
   moduleId,
@@ -37,6 +39,7 @@ export function AssessmentScreen({
 
       try {
         const response = await submitAssessmentAction({
+          courseId,
           assessmentId: assessment.id,
           moduleId,
           answers: review.attempt.answers,
@@ -51,30 +54,31 @@ export function AssessmentScreen({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[2rem] bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 px-6 py-8 text-white shadow-2xl">
-        <div className="flex flex-wrap items-center gap-3">
-          <Badge className="rounded-full bg-white/12 px-4 py-1 text-white hover:bg-white/12">
+      <section className="glass-surface-strong relative overflow-hidden rounded-[2rem] px-6 py-8 shadow-[var(--glass-shadow-lg)]">
+        <div className="pointer-events-none absolute inset-0 glass-highlight" />
+        <div className="relative flex flex-wrap items-center gap-3">
+          <Badge className="rounded-full border border-[var(--glass-border)] bg-foreground/10 px-4 py-1 text-foreground hover:bg-foreground/15">
             {assessmentType === "final_assessment" ? "Final Certification" : "Module Quiz"}
           </Badge>
           {bestScore !== null && bestScore !== undefined ? (
-            <Badge variant="outline" className="rounded-full border-white/20 bg-white/8 px-3 py-1 text-white">
+            <Badge variant="outline" className="rounded-full border-[var(--glass-border)] bg-foreground/5 px-3 py-1 text-foreground">
               Best score {bestScore}%
             </Badge>
           ) : null}
         </div>
-        <h2 className="mt-4 text-4xl font-semibold tracking-tight">{heading}</h2>
-        <p className="mt-4 max-w-4xl text-base leading-8 text-white/80">{description}</p>
+        <h2 className="relative mt-4 text-4xl font-semibold tracking-tight text-foreground">{heading}</h2>
+        <p className="relative mt-4 max-w-4xl text-base leading-8 text-muted-foreground">{description}</p>
       </section>
 
       {bestScore !== null && bestScore !== undefined ? (
-        <Card className="rounded-[2rem] border-0 shadow-lg">
+        <Card className="rounded-[2rem]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Trophy className="h-5 w-5" />
               Best Recorded Attempt
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-sm leading-6 text-slate-600">
+          <CardContent className="text-sm leading-6 text-muted-foreground">
             The best saved score for this assessment is {bestScore}%. You can retake it at any time
             to improve your result.
           </CardContent>
@@ -82,8 +86,8 @@ export function AssessmentScreen({
       ) : null}
 
       {pending ? (
-        <Card className="rounded-[2rem] border-0 shadow-lg">
-          <CardContent className="flex items-center gap-3 px-6 py-5 text-sm text-slate-600">
+        <Card className="rounded-[2rem]">
+          <CardContent className="flex items-center gap-3 px-6 py-5 text-sm text-muted-foreground">
             <RotateCcw className="h-4 w-4 animate-spin" />
             Saving your assessment attempt...
           </CardContent>
@@ -91,13 +95,13 @@ export function AssessmentScreen({
       ) : null}
 
       {error ? (
-        <Card className="rounded-[2rem] border border-red-200 bg-red-50 shadow-none">
-          <CardContent className="px-6 py-5 text-sm text-red-700">{error}</CardContent>
+        <Card className="rounded-[2rem] border-destructive/30 bg-destructive/10 shadow-none">
+          <CardContent className="px-6 py-5 text-sm text-destructive">{error}</CardContent>
         </Card>
       ) : null}
 
       <AssessmentRunner
-        courseId="sales-rep-onboarding"
+        courseId={courseId}
         assessment={assessment}
         assessmentType={assessmentType}
         moduleId={moduleId}

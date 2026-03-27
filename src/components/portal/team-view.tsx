@@ -33,10 +33,10 @@ export function TeamView({ records }: { records: TeamRecord[] }) {
 
   return (
     <div className="space-y-6">
-      <Card className="rounded-[2rem] border-0 shadow-lg">
+      <Card className="rounded-[2rem]">
         <CardContent className="p-6">
           <div className="relative">
-            <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -49,17 +49,17 @@ export function TeamView({ records }: { records: TeamRecord[] }) {
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {filtered.map((record) => (
-          <Card key={record.id} className="rounded-[2rem] border-0 shadow-lg">
+          <Card key={record.id} className="rounded-[2rem]">
             <CardContent className="space-y-4 p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-950">{record.name}</h3>
-                  <p className="text-sm text-slate-500">{record.title}</p>
+                  <h3 className="text-lg font-semibold text-foreground">{record.name}</h3>
+                  <p className="text-sm text-muted-foreground">{record.title}</p>
                 </div>
                 <Badge className="rounded-full">{record.status}</Badge>
               </div>
 
-              <div className="space-y-3 text-sm text-slate-600">
+              <div className="space-y-3 text-sm text-muted-foreground">
                 <div>
                   <div className="mb-1 flex items-center justify-between">
                     <span>Training Progress</span>
@@ -73,7 +73,7 @@ export function TeamView({ records }: { records: TeamRecord[] }) {
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Next Route</span>
-                  <span className="max-w-[11rem] truncate text-right text-slate-500">
+                  <span className="max-w-[11rem] truncate text-right text-muted-foreground">
                     {record.nextHref ?? "No next step"}
                   </span>
                 </div>

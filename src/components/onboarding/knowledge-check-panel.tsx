@@ -56,8 +56,8 @@ export function KnowledgeCheckPanel({
                 <div
                   className={`mt-4 rounded-2xl px-4 py-3 text-sm ${
                     questionResult.correct
-                      ? "bg-emerald-50 text-emerald-950"
-                      : "bg-amber-50 text-amber-950"
+                      ? "border border-[var(--glass-border)] bg-foreground/5 text-foreground"
+                      : "border border-destructive/30 bg-destructive/10 text-foreground"
                   }`}
                 >
                   <p className="font-medium">

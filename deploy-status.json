@@ -1,0 +1,13 @@
+{
+  "project": "cos",
+  "type": "prototype",
+  "environment": "Preview",
+  "url": "https://cos-ppv0973px-rahimlou91-6841s-projects.vercel.app",
+  "timestamp": "2026-03-27T22:24:20Z",
+  "vercel_user": "rahimlou91-6841",
+  "http_status": "401",
+  "page_size_bytes": 14558,
+  "response_time": "0.103715",
+  "validation_passed": true,
+  "post_deploy_ok": false
+}

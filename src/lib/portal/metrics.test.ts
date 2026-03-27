@@ -14,6 +14,7 @@ const sampleUser: PublicUser = {
   title: "Sales Rep",
   department: "Sales",
   active: true,
+  activeCourseId: salesRepOnboardingCourse.id,
 };
 
 function createEnrollment(progress = createInitialCourseProgress(salesRepOnboardingCourse.id)): CourseEnrollment {
@@ -35,7 +36,13 @@ function createEnrollment(progress = createInitialCourseProgress(salesRepOnboard
 
 describe("buildLearnerSummary", () => {
   it("reports unassigned learners correctly", () => {
-    const summary = buildLearnerSummary(sampleUser, null);
+    const summary = buildLearnerSummary({
+      course: salesRepOnboardingCourse,
+      department: "Sales",
+      protectedCourse: true,
+      user: sampleUser,
+      enrollment: null,
+    });
 
     expect(summary.assigned).toBe(false);
     expect(summary.status).toBe("Not assigned");
@@ -49,7 +56,13 @@ describe("buildLearnerSummary", () => {
 
     progress = markLessonComplete(progress, firstModule.lessons[0]!.id);
 
-    const summary = buildLearnerSummary(sampleUser, createEnrollment(progress));
+    const summary = buildLearnerSummary({
+      course: salesRepOnboardingCourse,
+      department: "Sales",
+      protectedCourse: true,
+      user: sampleUser,
+      enrollment: createEnrollment(progress),
+    });
 
     expect(summary.assigned).toBe(true);
     expect(summary.completionPercent).toBeGreaterThan(0);
@@ -61,7 +74,13 @@ describe("buildLearnerSummary", () => {
     const enrollment = createEnrollment();
     enrollment.managerMarkedComplete = true;
 
-    const summary = buildLearnerSummary(sampleUser, enrollment);
+    const summary = buildLearnerSummary({
+      course: salesRepOnboardingCourse,
+      department: "Sales",
+      protectedCourse: true,
+      user: sampleUser,
+      enrollment,
+    });
 
     expect(summary.completionPercent).toBe(100);
     expect(summary.status).toBe("Completed");
@@ -91,7 +110,13 @@ describe("buildLearnerSummary", () => {
       answers,
     });
 
-    const summary = buildLearnerSummary(sampleUser, createEnrollment(progress));
+    const summary = buildLearnerSummary({
+      course: salesRepOnboardingCourse,
+      department: "Sales",
+      protectedCourse: true,
+      user: sampleUser,
+      enrollment: createEnrollment(progress),
+    });
 
     expect(summary.needsCoaching).toBe(true);
     expect(summary.status).toBe("Needs coaching");

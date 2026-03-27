@@ -48,6 +48,19 @@ const image = (
   height,
 });
 
+const video = (
+  url: string,
+  title: string,
+  caption?: string,
+  poster?: string,
+): ContentBlock => ({
+  type: "video",
+  url,
+  title,
+  caption,
+  poster,
+});
+
 const quote = (text: string): ContentBlock => ({
   type: "quote",
   text,
@@ -234,8 +247,13 @@ export const salesRepOnboardingCourse: Course = {
               709,
               501,
             ),
+            video(
+              "https://youtu.be/0OfzgYTEyeA",
+              "COS welcome video",
+              "The slide 3 welcome video is now playable directly inside the onboarding lesson so reps can complete orientation without leaving the app.",
+            ),
             callout(
-              "Slide 3 points reps to a welcome video at https://youtu.be/0OfzgYTEyeA. Keep that asset available during orientation so the deck's intended introduction remains intact.",
+              "Slide 3 points reps to the welcome video shown above. Keep that asset available during orientation so the deck's intended introduction remains intact.",
               "Orientation asset",
             ),
           ],

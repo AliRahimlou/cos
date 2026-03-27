@@ -9,11 +9,11 @@ export default async function TeamPage() {
 
   return (
     <div className="space-y-6">
-      <Card className="rounded-[2rem] border-0 shadow-lg">
+      <Card className="rounded-[2rem]">
         <CardHeader>
           <CardTitle>Team Overview</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm leading-6 text-slate-600">
+        <CardContent className="text-sm leading-6 text-muted-foreground">
           Search learners by name, title, or status and inspect training completion, quiz averages,
           and the current next-step route for each learner.
         </CardContent>
@@ -23,7 +23,7 @@ export default async function TeamPage() {
         records={records.map((record) => ({
           id: record.user.id,
           name: record.user.name,
-          title: record.user.title,
+          title: `${record.user.title} · ${record.courseTitle}`,
           status: record.status,
           completionPercent: record.completionPercent,
           quizAverage: record.quizAverage,

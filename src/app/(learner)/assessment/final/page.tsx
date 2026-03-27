@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Lock } from "lucide-react";
 
 import { AssessmentScreen } from "@/components/portal/assessment-screen";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireSessionUser } from "@/lib/auth/session";
 import { getBestAssessmentAttempt } from "@/lib/onboarding/progress";
@@ -13,7 +13,7 @@ export default async function FinalAssessmentPage() {
   const sessionUser = await requireSessionUser("learner");
   const context = await getLearnerContext(sessionUser.id);
 
-  if (!context || !context.enrollment || !context.course.finalAssessment) {
+  if (!context || !context.enrollment) {
     return null;
   }
 
@@ -21,7 +21,25 @@ export default async function FinalAssessmentPage() {
   const finalAssessment = course.finalAssessment;
 
   if (!finalAssessment) {
-    return null;
+    return (
+      <Card className="rounded-[2rem] border-0 shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-2xl">No final assessment configured</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm leading-6 text-slate-600">
+          <p>
+            This onboarding program does not currently include a cumulative final assessment. Module
+            completion is the primary completion path for this department.
+          </p>
+          <Link
+            href="/results"
+            className={cn(buttonVariants({ variant: "outline" }), "rounded-2xl")}
+          >
+            Review program status
+          </Link>
+        </CardContent>
+      </Card>
+    );
   }
 
   const bestAttempt = getBestAssessmentAttempt(enrollment.progress, finalAssessment.id);
@@ -53,10 +71,11 @@ export default async function FinalAssessmentPage() {
 
   return (
     <AssessmentScreen
+      courseId={course.id}
       assessment={finalAssessment}
       assessmentType="final_assessment"
-      heading="Final Certification Assessment"
-      description="This cumulative exam covers the full sales rep onboarding program. A passing score of 85% is required for certification."
+      heading={`${course.title} Final Assessment`}
+      description={`This cumulative exam covers the ${course.title} program. A passing score of ${finalAssessment.passingScore}% is required.`}
       bestScore={bestAttempt?.scorePercent ?? null}
     />
   );

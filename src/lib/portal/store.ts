@@ -4,7 +4,7 @@ import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 
 import type { SessionUser } from "@/lib/auth/types";
-import { salesRepOnboardingCourse } from "@/content/onboarding/sales-rep/course";
+import { listProtectedPrograms } from "@/content/onboarding/program-registry";
 import {
   createInitialCourseProgress,
   findLesson,
@@ -19,11 +19,15 @@ import type {
   Assessment,
   AssessmentAttempt,
   Course,
+  Lesson,
+  Module,
   QuestionResponse,
 } from "@/lib/onboarding/types";
 
 import type {
   CourseEnrollment,
+  CourseModuleExtension,
+  ManagedCourseRecord,
   PortalActivity,
   PortalState,
   PortalUser,
@@ -31,7 +35,7 @@ import type {
 } from "./types";
 
 const DATA_FILE = path.join(process.cwd(), "data", "onboarding-state.json");
-const course = salesRepOnboardingCourse;
+const defaultProtectedCourseId = listProtectedPrograms()[0]?.courseId ?? "sales-rep-onboarding";
 
 let writeQueue = Promise.resolve();
 
@@ -41,6 +45,89 @@ function now() {
 
 function createId(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function slugify(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+}
+
+function splitLines(value: string) {
+  return value
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function getProtectedCourseRecords(): ManagedCourseRecord[] {
+  return listProtectedPrograms().map((program) => ({
+    courseId: program.courseId,
+    department: program.department,
+    source: program.source,
+    protected: program.protected,
+    createdAt: "2026-03-27T00:00:00.000Z",
+    updatedAt: "2026-03-27T00:00:00.000Z",
+    deckPath: program.deckPath,
+    extractionArtifact: program.extractionArtifact,
+    notesPath: program.notesPath,
+    course: program.course,
+  }));
+}
+
+function mergeCourseWithExtensions(
+  course: Course,
+  extension?: CourseModuleExtension | null,
+): Course {
+  if (!extension || extension.modules.length === 0) {
+    return course;
+  }
+
+  return {
+    ...course,
+    estimatedMinutes:
+      course.estimatedMinutes +
+      extension.modules.reduce((sum, module) => sum + module.estimatedMinutes, 0),
+    modules: [...course.modules, ...extension.modules],
+  };
+}
+
+function getCourseRecordsFromState(state: PortalState) {
+  const protectedCourses = getProtectedCourseRecords();
+  const allRecords = [...protectedCourses, ...state.customCourses];
+
+  return allRecords.map((record) => ({
+    ...record,
+    course: mergeCourseWithExtensions(
+      record.course,
+      state.courseModuleExtensions.find((item) => item.courseId === record.courseId),
+    ),
+  }));
+}
+
+function getCourseRecordFromState(state: PortalState, courseId: string) {
+  return getCourseRecordsFromState(state).find((record) => record.courseId === courseId) ?? null;
+}
+
+function getDefaultCourseIdForUser(state: PortalState, userId: string) {
+  const user = state.users.find((item) => item.id === userId);
+
+  if (user?.activeCourseId && getCourseRecordFromState(state, user.activeCourseId)) {
+    return user.activeCourseId;
+  }
+
+  const assignedEnrollment = state.enrollments.find(
+    (item) => item.userId === userId && item.assigned && getCourseRecordFromState(state, item.courseId),
+  );
+
+  if (assignedEnrollment) {
+    return assignedEnrollment.courseId;
+  }
+
+  return defaultProtectedCourseId;
 }
 
 function buildIncorrectAnswer(assessment: Assessment, questionIndex: number): QuestionResponse {
@@ -113,12 +200,107 @@ function createAttempt(
   };
 }
 
-function seedLearnerProgress(config: {
-  completedModules: number;
-  extraLessons: number;
-  passedQuizScores?: number[];
-  failedModuleAttempt?: { moduleIndex: number; score: number };
-}): CourseEnrollment["progress"] {
+function buildSeedUsers(): PortalUser[] {
+  return [
+    {
+      id: "manager-morgan-lee",
+      name: "Morgan Lee",
+      email: "manager@cos.local",
+      password: "manager123",
+      role: "manager",
+      title: "Sales Manager",
+      department: "Sales",
+      active: true,
+      activeCourseId: defaultProtectedCourseId,
+    },
+    {
+      id: "learner-casey-holt",
+      name: "Casey Holt",
+      email: "learner@cos.local",
+      password: "learner123",
+      role: "learner",
+      title: "Sales Rep",
+      department: "Sales",
+      active: true,
+      activeCourseId: defaultProtectedCourseId,
+    },
+    {
+      id: "learner-shyanne-brooks",
+      name: "Shyanne Brooks",
+      email: "shyanne@cos.local",
+      password: "learner123",
+      role: "learner",
+      title: "Sales Rep",
+      department: "Sales",
+      active: true,
+      activeCourseId: defaultProtectedCourseId,
+    },
+    {
+      id: "learner-alex-carter",
+      name: "Alex Carter",
+      email: "alex@cos.local",
+      password: "learner123",
+      role: "learner",
+      title: "Sales Rep",
+      department: "Sales",
+      active: true,
+      activeCourseId: defaultProtectedCourseId,
+    },
+    {
+      id: "learner-jordan-reed",
+      name: "Jordan Reed",
+      email: "jordan@cos.local",
+      password: "learner123",
+      role: "learner",
+      title: "Sales Rep",
+      department: "Sales",
+      active: true,
+      activeCourseId: defaultProtectedCourseId,
+    },
+    {
+      id: "learner-taylor-nguyen",
+      name: "Taylor Nguyen",
+      email: "taylor@cos.local",
+      password: "learner123",
+      role: "learner",
+      title: "Sales Rep",
+      department: "Sales",
+      active: true,
+      activeCourseId: defaultProtectedCourseId,
+    },
+  ];
+}
+
+function buildSeedEnrollment(
+  userId: string,
+  courseId: string,
+  progress: CourseEnrollment["progress"],
+): CourseEnrollment {
+  return {
+    userId,
+    courseId,
+    assigned: true,
+    assignedAt: progress.startedAt,
+    locked: false,
+    lockedModuleIds: [],
+    finalAssessmentUnlocked: false,
+    managerMarkedComplete: null,
+    managerMarkedAt: null,
+    completedAt: null,
+    progress,
+    activity: [],
+  };
+}
+
+function seedLearnerProgress(
+  course: Course,
+  config: {
+    completedModules: number;
+    extraLessons: number;
+    passedQuizScores?: number[];
+    failedModuleAttempt?: { moduleIndex: number; score: number };
+  },
+): CourseEnrollment["progress"] {
   let progress = createInitialCourseProgress(course.id);
 
   for (let moduleIndex = 0; moduleIndex < config.completedModules; moduleIndex += 1) {
@@ -169,101 +351,30 @@ function seedLearnerProgress(config: {
   return progress;
 }
 
-function buildSeedUsers(): PortalUser[] {
-  return [
-    {
-      id: "manager-morgan-lee",
-      name: "Morgan Lee",
-      email: "manager@cos.local",
-      password: "manager123",
-      role: "manager",
-      title: "Sales Manager",
-      department: "Sales",
-      active: true,
-    },
-    {
-      id: "learner-casey-holt",
-      name: "Casey Holt",
-      email: "learner@cos.local",
-      password: "learner123",
-      role: "learner",
-      title: "Sales Rep",
-      department: "Sales",
-      active: true,
-    },
-    {
-      id: "learner-shyanne-brooks",
-      name: "Shyanne Brooks",
-      email: "shyanne@cos.local",
-      password: "learner123",
-      role: "learner",
-      title: "Sales Rep",
-      department: "Sales",
-      active: true,
-    },
-    {
-      id: "learner-alex-carter",
-      name: "Alex Carter",
-      email: "alex@cos.local",
-      password: "learner123",
-      role: "learner",
-      title: "Sales Rep",
-      department: "Sales",
-      active: true,
-    },
-    {
-      id: "learner-jordan-reed",
-      name: "Jordan Reed",
-      email: "jordan@cos.local",
-      password: "learner123",
-      role: "learner",
-      title: "Sales Rep",
-      department: "Sales",
-      active: true,
-    },
-    {
-      id: "learner-taylor-nguyen",
-      name: "Taylor Nguyen",
-      email: "taylor@cos.local",
-      password: "learner123",
-      role: "learner",
-      title: "Sales Rep",
-      department: "Sales",
-      active: true,
-    },
-  ];
-}
-
-function buildSeedEnrollment(
-  userId: string,
-  progress: CourseEnrollment["progress"],
-): CourseEnrollment {
-  return {
-    userId,
-    courseId: course.id,
-    assigned: true,
-    assignedAt: progress.startedAt,
-    locked: false,
-    lockedModuleIds: [],
-    finalAssessmentUnlocked: false,
-    managerMarkedComplete: null,
-    managerMarkedAt: null,
-    completedAt: null,
-    progress,
-    activity: [],
-  };
-}
-
 function createSeedState(): PortalState {
+  const baseCourse = getProtectedCourseRecords()[0]?.course;
   const users = buildSeedUsers();
+
+  if (!baseCourse) {
+    return {
+      version: 2,
+      users,
+      enrollments: [],
+      customCourses: [],
+      courseModuleExtensions: [],
+    };
+  }
+
   const enrollments: CourseEnrollment[] = [
     buildSeedEnrollment(
       "learner-casey-holt",
-      createInitialCourseProgress(course.id),
+      baseCourse.id,
+      createInitialCourseProgress(baseCourse.id),
     ),
     buildSeedEnrollment(
       "learner-shyanne-brooks",
-      seedLearnerProgress({
+      baseCourse.id,
+      seedLearnerProgress(baseCourse, {
         completedModules: 6,
         extraLessons: 1,
         passedQuizScores: [100, 100, 100, 83, 100, 83],
@@ -271,7 +382,8 @@ function createSeedState(): PortalState {
     ),
     buildSeedEnrollment(
       "learner-alex-carter",
-      seedLearnerProgress({
+      baseCourse.id,
+      seedLearnerProgress(baseCourse, {
         completedModules: 4,
         extraLessons: 1,
         passedQuizScores: [100, 80, 80, 80],
@@ -279,7 +391,8 @@ function createSeedState(): PortalState {
     ),
     buildSeedEnrollment(
       "learner-jordan-reed",
-      seedLearnerProgress({
+      baseCourse.id,
+      seedLearnerProgress(baseCourse, {
         completedModules: 0,
         extraLessons: 5,
         failedModuleAttempt: { moduleIndex: 0, score: 50 },
@@ -287,7 +400,8 @@ function createSeedState(): PortalState {
     ),
     buildSeedEnrollment(
       "learner-taylor-nguyen",
-      seedLearnerProgress({
+      baseCourse.id,
+      seedLearnerProgress(baseCourse, {
         completedModules: 5,
         extraLessons: 1,
         passedQuizScores: [100, 80, 80, 83, 80],
@@ -296,9 +410,44 @@ function createSeedState(): PortalState {
   ];
 
   return {
-    version: 1,
+    version: 2,
     users,
     enrollments,
+    customCourses: [],
+    courseModuleExtensions: [],
+  };
+}
+
+function normalizeState(raw: unknown): PortalState {
+  const fallback = createSeedState();
+
+  if (!raw || typeof raw !== "object") {
+    return fallback;
+  }
+
+  const candidate = raw as Partial<PortalState> & {
+    version?: number;
+    users?: Array<Partial<PortalUser>>;
+    enrollments?: CourseEnrollment[];
+  };
+
+  return {
+    version: 2,
+    users: (candidate.users ?? fallback.users).map((user) => ({
+      id: user.id ?? createId("user"),
+      name: user.name ?? "Unknown User",
+      email: user.email ?? "",
+      password: user.password ?? "learner123",
+      role: user.role === "manager" ? "manager" : "learner",
+      title: user.title ?? "Team Member",
+      department: user.department ?? "General",
+      active: user.active ?? true,
+      activeCourseId: user.activeCourseId ?? defaultProtectedCourseId,
+    })),
+    enrollments: candidate.enrollments ?? fallback.enrollments,
+    customCourses: candidate.version === 2 ? candidate.customCourses ?? [] : [],
+    courseModuleExtensions:
+      candidate.version === 2 ? candidate.courseModuleExtensions ?? [] : [],
   };
 }
 
@@ -315,7 +464,7 @@ async function ensureStateFile() {
 async function readState(): Promise<PortalState> {
   await ensureStateFile();
   const raw = await readFile(DATA_FILE, "utf8");
-  return JSON.parse(raw) as PortalState;
+  return normalizeState(JSON.parse(raw));
 }
 
 async function writeState(state: PortalState) {
@@ -391,8 +540,15 @@ function appendActivity(
 
 function syncCompletionState(enrollment: CourseEnrollment, activeCourse: Course) {
   const stats = getCourseStats(activeCourse, enrollment.progress);
+  const completedWithoutFinal =
+    !activeCourse.finalAssessment &&
+    activeCourse.modules.length > 0 &&
+    stats.completedModules === activeCourse.modules.length;
   const completed =
-    enrollment.managerMarkedComplete === true || stats.finalAssessmentPassed;
+    enrollment.managerMarkedComplete === true ||
+    stats.finalAssessmentPassed ||
+    completedWithoutFinal;
+
   enrollment.completedAt = completed ? enrollment.completedAt ?? now() : null;
 }
 
@@ -402,10 +558,14 @@ function sanitizeUser(user: PortalUser): PublicUser {
   return publicUser;
 }
 
-function resolveAssessment(assessmentId: string, moduleId?: string) {
-  if (course.finalAssessment?.id === assessmentId) {
+function resolveAssessment(
+  activeCourse: Course,
+  assessmentId: string,
+  moduleId?: string,
+) {
+  if (activeCourse.finalAssessment?.id === assessmentId) {
     return {
-      assessment: course.finalAssessment,
+      assessment: activeCourse.finalAssessment,
       assessmentType: "final_assessment" as const,
       moduleId: undefined,
     };
@@ -415,7 +575,7 @@ function resolveAssessment(assessmentId: string, moduleId?: string) {
     return null;
   }
 
-  const courseModule = findModule(course, moduleId);
+  const courseModule = findModule(activeCourse, moduleId);
 
   if (!courseModule?.quiz || courseModule.quiz.id !== assessmentId) {
     return null;
@@ -428,8 +588,90 @@ function resolveAssessment(assessmentId: string, moduleId?: string) {
   };
 }
 
+function createManagedLesson(
+  lessonId: string,
+  title: string,
+  description: string,
+  objectives: string[],
+  keyTakeaways: string[],
+): Lesson {
+  return {
+    id: lessonId,
+    title,
+    description,
+    sourceSlides: [],
+    objectives,
+    keyTakeaways,
+    content: [
+      { type: "paragraph", text: description },
+      { type: "bullets", items: keyTakeaways },
+    ],
+    knowledgeChecks: [],
+  };
+}
+
+function createManagedModule(input: {
+  department: string;
+  title: string;
+  description: string;
+  estimatedMinutes: number;
+  lessonTitle?: string;
+  lessonDescription?: string;
+  objectivesText?: string;
+  keyTakeawaysText?: string;
+}): Module {
+  const moduleSlug = slugify(input.title) || createId("module");
+  const moduleId = `manager-${moduleSlug}-${createId("m").slice(-4)}`;
+  const objectives = splitLines(input.objectivesText ?? "");
+  const keyTakeaways = splitLines(input.keyTakeawaysText ?? "");
+  const lessonTitle = input.lessonTitle?.trim() || `${input.title} Orientation`;
+  const lessonDescription =
+    input.lessonDescription?.trim() ||
+    `Manager-authored onboarding content for ${input.department}.`;
+  const fallbackTakeaways =
+    keyTakeaways.length > 0
+      ? keyTakeaways
+      : [
+          input.description.trim() || `${input.department} onboarding foundation.`,
+          `Use this module as the starting point for ${input.department} learners.`,
+        ];
+
+  return {
+    id: moduleId,
+    title: input.title.trim(),
+    description: input.description.trim(),
+    estimatedMinutes: input.estimatedMinutes,
+    sourceSlides: [],
+    icon: "book-open",
+    lessons: [
+      createManagedLesson(
+        `${moduleId}-lesson-1`,
+        lessonTitle,
+        lessonDescription,
+        objectives.length > 0
+          ? objectives
+          : [
+              `Understand the purpose of ${input.title.trim()}.`,
+              `Review the initial guidance for the ${input.department} department.`,
+            ],
+        fallbackTakeaways,
+      ),
+    ],
+  };
+}
+
 export async function readPortalState() {
   return readState();
+}
+
+export async function listCourses() {
+  const state = await readState();
+  return getCourseRecordsFromState(state);
+}
+
+export async function getCourseRecord(courseId: string) {
+  const state = await readState();
+  return getCourseRecordFromState(state, courseId);
 }
 
 export async function getUserById(userId: string) {
@@ -482,20 +724,38 @@ export function toSessionUser(user: PortalUser | PublicUser): SessionUser {
 }
 
 export async function getCurrentCourseForUser(userId: string) {
-  const enrollment = await getEnrollment(userId, course.id);
+  const state = await readState();
+  const activeCourseId = getDefaultCourseIdForUser(state, userId);
+  const record = getCourseRecordFromState(state, activeCourseId);
+
+  if (!record) {
+    return null;
+  }
+
   return {
-    course,
-    enrollment,
+    record,
+    course: record.course,
+    enrollment:
+      state.enrollments.find(
+        (item) => item.userId === userId && item.courseId === record.courseId,
+      ) ?? null,
   };
 }
 
 export async function markLessonCompleteForUser(
   userId: string,
+  courseId: string,
   lessonId: string,
 ) {
   return mutateState((state) => {
-    const enrollment = getOrCreateEnrollmentRecord(state, userId, course.id);
-    const lessonMatch = findLesson(course, lessonId);
+    const record = getCourseRecordFromState(state, courseId);
+
+    if (!record) {
+      throw new Error("Course not found.");
+    }
+
+    const enrollment = getOrCreateEnrollmentRecord(state, userId, courseId);
+    const lessonMatch = findLesson(record.course, lessonId);
 
     if (!lessonMatch) {
       throw new Error("Lesson not found.");
@@ -522,20 +782,27 @@ export async function markLessonCompleteForUser(
       });
     }
 
-    syncCompletionState(enrollment, course);
+    syncCompletionState(enrollment, record.course);
     return enrollment;
   });
 }
 
 export async function submitAssessmentForUser(input: {
   userId: string;
+  courseId: string;
   assessmentId: string;
   moduleId?: string;
   answers: Record<string, QuestionResponse>;
 }) {
   return mutateState((state) => {
-    const enrollment = getOrCreateEnrollmentRecord(state, input.userId, course.id);
-    const resolved = resolveAssessment(input.assessmentId, input.moduleId);
+    const record = getCourseRecordFromState(state, input.courseId);
+
+    if (!record) {
+      throw new Error("Course not found.");
+    }
+
+    const enrollment = getOrCreateEnrollmentRecord(state, input.userId, input.courseId);
+    const resolved = resolveAssessment(record.course, input.assessmentId, input.moduleId);
 
     if (!resolved) {
       throw new Error("Assessment not found.");
@@ -556,7 +823,7 @@ export async function submitAssessmentForUser(input: {
     if (
       resolved.assessmentType === "final_assessment" &&
       !enrollment.finalAssessmentUnlocked &&
-      !course.modules.every((module) => getModuleStatus(module, enrollment.progress).completed)
+      !record.course.modules.every((module) => getModuleStatus(module, enrollment.progress).completed)
     ) {
       throw new Error("Final assessment is locked.");
     }
@@ -565,7 +832,7 @@ export async function submitAssessmentForUser(input: {
     const completedAt = now();
     const attempt: AssessmentAttempt = {
       assessmentId: resolved.assessment.id,
-      courseId: course.id,
+      courseId: input.courseId,
       moduleId: resolved.moduleId,
       assessmentType: resolved.assessmentType,
       scorePercent: outcome.scorePercent,
@@ -583,12 +850,12 @@ export async function submitAssessmentForUser(input: {
       message:
         resolved.assessmentType === "final_assessment"
           ? `Submitted final assessment with ${attempt.scorePercent}%`
-          : `Submitted ${findModule(course, resolved.moduleId ?? "")?.title ?? "module"} quiz with ${attempt.scorePercent}%`,
+          : `Submitted ${findModule(record.course, resolved.moduleId ?? "")?.title ?? "module"} quiz with ${attempt.scorePercent}%`,
       assessmentId: resolved.assessment.id,
       moduleId: resolved.moduleId,
       scorePercent: attempt.scorePercent,
     });
-    syncCompletionState(enrollment, course);
+    syncCompletionState(enrollment, record.course);
 
     return {
       attempt,
@@ -601,33 +868,89 @@ export async function submitAssessmentForUser(input: {
 export async function setAssignmentForUser(
   actorUserId: string,
   userId: string,
+  courseId: string,
   assigned: boolean,
 ) {
   return mutateState((state) => {
-    const enrollment = getOrCreateEnrollmentRecord(state, userId, course.id);
+    const user = state.users.find((item) => item.id === userId);
+    const record = getCourseRecordFromState(state, courseId);
+
+    if (!user || !record) {
+      throw new Error("User or course not found.");
+    }
+
+    const enrollment = getOrCreateEnrollmentRecord(state, userId, courseId);
     enrollment.assigned = assigned;
     enrollment.assignedAt = assigned ? enrollment.assignedAt ?? now() : enrollment.assignedAt;
+
+    if (assigned && !user.activeCourseId) {
+      user.activeCourseId = courseId;
+    }
+
     appendActivity(enrollment, {
       actorUserId,
       type: "assignment_updated",
-      message: assigned ? "Manager assigned the onboarding course." : "Manager unassigned the onboarding course.",
+      message: assigned
+        ? `Manager assigned ${record.course.title}.`
+        : `Manager unassigned ${record.course.title}.`,
     });
     return enrollment;
+  });
+}
+
+export async function setActiveCourseForUser(
+  actorUserId: string,
+  userId: string,
+  courseId: string,
+) {
+  return mutateState((state) => {
+    const user = state.users.find((item) => item.id === userId);
+    const record = getCourseRecordFromState(state, courseId);
+
+    if (!user || !record) {
+      throw new Error("User or course not found.");
+    }
+
+    const enrollment = getOrCreateEnrollmentRecord(state, userId, courseId);
+    enrollment.assigned = true;
+    enrollment.assignedAt = enrollment.assignedAt ?? now();
+    user.activeCourseId = courseId;
+    user.department = record.department;
+
+    appendActivity(enrollment, {
+      actorUserId,
+      type: "active_course_updated",
+      message: `Manager set ${record.course.title} as the active onboarding program.`,
+    });
+
+    return {
+      user,
+      enrollment,
+    };
   });
 }
 
 export async function setCourseLockedForUser(
   actorUserId: string,
   userId: string,
+  courseId: string,
   locked: boolean,
 ) {
   return mutateState((state) => {
-    const enrollment = getOrCreateEnrollmentRecord(state, userId, course.id);
+    const record = getCourseRecordFromState(state, courseId);
+
+    if (!record) {
+      throw new Error("Course not found.");
+    }
+
+    const enrollment = getOrCreateEnrollmentRecord(state, userId, courseId);
     enrollment.locked = locked;
     appendActivity(enrollment, {
       actorUserId,
       type: "course_locked",
-      message: locked ? "Manager locked the course." : "Manager unlocked the course.",
+      message: locked
+        ? `Manager locked ${record.course.title}.`
+        : `Manager unlocked ${record.course.title}.`,
     });
     return enrollment;
   });
@@ -636,11 +959,12 @@ export async function setCourseLockedForUser(
 export async function setModuleLockedForUser(
   actorUserId: string,
   userId: string,
+  courseId: string,
   moduleId: string,
   locked: boolean,
 ) {
   return mutateState((state) => {
-    const enrollment = getOrCreateEnrollmentRecord(state, userId, course.id);
+    const enrollment = getOrCreateEnrollmentRecord(state, userId, courseId);
     const nextLockedModuleIds = new Set(enrollment.lockedModuleIds);
 
     if (locked) {
@@ -663,10 +987,17 @@ export async function setModuleLockedForUser(
 export async function setFinalAssessmentOverrideForUser(
   actorUserId: string,
   userId: string,
+  courseId: string,
   unlocked: boolean,
 ) {
   return mutateState((state) => {
-    const enrollment = getOrCreateEnrollmentRecord(state, userId, course.id);
+    const record = getCourseRecordFromState(state, courseId);
+
+    if (!record) {
+      throw new Error("Course not found.");
+    }
+
+    const enrollment = getOrCreateEnrollmentRecord(state, userId, courseId);
     enrollment.finalAssessmentUnlocked = unlocked;
     appendActivity(enrollment, {
       actorUserId,
@@ -674,7 +1005,7 @@ export async function setFinalAssessmentOverrideForUser(
       message: unlocked
         ? "Manager unlocked the final assessment early."
         : "Manager removed the final assessment override.",
-      assessmentId: course.finalAssessment?.id,
+      assessmentId: record.course.finalAssessment?.id,
     });
     return enrollment;
   });
@@ -683,10 +1014,17 @@ export async function setFinalAssessmentOverrideForUser(
 export async function setManagerCompletionForUser(
   actorUserId: string,
   userId: string,
+  courseId: string,
   completed: boolean,
 ) {
   return mutateState((state) => {
-    const enrollment = getOrCreateEnrollmentRecord(state, userId, course.id);
+    const record = getCourseRecordFromState(state, courseId);
+
+    if (!record) {
+      throw new Error("Course not found.");
+    }
+
+    const enrollment = getOrCreateEnrollmentRecord(state, userId, courseId);
     enrollment.managerMarkedComplete = completed;
     enrollment.managerMarkedAt = now();
     appendActivity(enrollment, {
@@ -696,15 +1034,19 @@ export async function setManagerCompletionForUser(
         ? "Manager marked onboarding complete."
         : "Manager marked onboarding incomplete.",
     });
-    syncCompletionState(enrollment, course);
+    syncCompletionState(enrollment, record.course);
     return enrollment;
   });
 }
 
-export async function resetProgressForUser(actorUserId: string, userId: string) {
+export async function resetProgressForUser(
+  actorUserId: string,
+  userId: string,
+  courseId: string,
+) {
   return mutateState((state) => {
-    const enrollment = getOrCreateEnrollmentRecord(state, userId, course.id);
-    enrollment.progress = createInitialCourseProgress(course.id);
+    const enrollment = getOrCreateEnrollmentRecord(state, userId, courseId);
+    enrollment.progress = createInitialCourseProgress(courseId);
     enrollment.managerMarkedComplete = null;
     enrollment.managerMarkedAt = null;
     enrollment.completedAt = null;
@@ -714,6 +1056,121 @@ export async function resetProgressForUser(actorUserId: string, userId: string) 
       message: "Manager reset course progress and attempts.",
     });
     return enrollment;
+  });
+}
+
+export async function createDepartmentProgram(
+  actorUserId: string,
+  input: {
+    department: string;
+    title: string;
+    description: string;
+    audience: string;
+    starterModuleTitle?: string;
+    starterLessonTitle?: string;
+    starterLessonDescription?: string;
+    objectivesText?: string;
+    keyTakeawaysText?: string;
+  },
+) {
+  return mutateState((state) => {
+    const departmentSlug = slugify(input.department);
+    const titleSlug = slugify(input.title);
+    const courseId = `${departmentSlug || "department"}-${titleSlug || "program"}-${createId("course").slice(-4)}`;
+    const starterModule = createManagedModule({
+      department: input.department,
+      title: input.starterModuleTitle?.trim() || `${input.department.trim()} Foundations`,
+      description:
+        input.description.trim() ||
+        `Initial onboarding program for ${input.department.trim()}.`,
+      estimatedMinutes: 20,
+      lessonTitle: input.starterLessonTitle,
+      lessonDescription: input.starterLessonDescription,
+      objectivesText: input.objectivesText,
+      keyTakeawaysText: input.keyTakeawaysText,
+    });
+
+    const course: Course = {
+      id: courseId,
+      title: input.title.trim(),
+      description: input.description.trim(),
+      audience: input.audience.trim(),
+      estimatedMinutes: starterModule.estimatedMinutes,
+      modules: [starterModule],
+    };
+
+    const record: ManagedCourseRecord = {
+      courseId,
+      department: input.department.trim(),
+      source: "manager",
+      protected: false,
+      createdAt: now(),
+      updatedAt: now(),
+      course,
+    };
+
+    state.customCourses.push(record);
+    return record;
+  });
+}
+
+export async function addModuleToCourse(
+  actorUserId: string,
+  input: {
+    courseId: string;
+    department: string;
+    title: string;
+    description: string;
+    estimatedMinutes: number;
+    lessonTitle?: string;
+    lessonDescription?: string;
+    objectivesText?: string;
+    keyTakeawaysText?: string;
+  },
+) {
+  return mutateState((state) => {
+    const record = getCourseRecordFromState(state, input.courseId);
+
+    if (!record) {
+      throw new Error("Course not found.");
+    }
+
+    const nextModule = createManagedModule({
+      department: input.department,
+      title: input.title,
+      description: input.description,
+      estimatedMinutes: input.estimatedMinutes,
+      lessonTitle: input.lessonTitle,
+      lessonDescription: input.lessonDescription,
+      objectivesText: input.objectivesText,
+      keyTakeawaysText: input.keyTakeawaysText,
+    });
+
+    const existingExtension = state.courseModuleExtensions.find(
+      (item) => item.courseId === input.courseId,
+    );
+
+    if (existingExtension) {
+      existingExtension.modules.push(nextModule);
+      existingExtension.updatedAt = now();
+    } else {
+      state.courseModuleExtensions.push({
+        courseId: input.courseId,
+        createdAt: now(),
+        updatedAt: now(),
+        createdByUserId: actorUserId,
+        modules: [nextModule],
+      });
+    }
+
+    const customCourse = state.customCourses.find((item) => item.courseId === input.courseId);
+
+    if (customCourse) {
+      customCourse.updatedAt = now();
+      customCourse.course.estimatedMinutes += input.estimatedMinutes;
+    }
+
+    return nextModule;
   });
 }
 

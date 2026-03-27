@@ -1,67 +1,218 @@
+import {
+  addModuleToCourseAction,
+  createDepartmentProgramAction,
+} from "@/app/actions/manager";
 import { SourceSlideBadges } from "@/components/onboarding/source-slide-badges";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireSessionUser } from "@/lib/auth/session";
-import { salesRepOnboardingCourse } from "@/content/onboarding/sales-rep/course";
+import { listCourses } from "@/lib/portal/store";
 
 export default async function ContentPage() {
   await requireSessionUser("manager");
-  const course = salesRepOnboardingCourse;
+  const courses = await listCourses();
 
   return (
     <div className="space-y-6">
-      <Card className="rounded-[2rem] border-0 shadow-lg">
+      <section className="grid gap-6 xl:grid-cols-2">
+        <Card className="rounded-[2rem]">
+          <CardHeader>
+            <CardTitle>Add Department / Program</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form action={createDepartmentProgramAction} className="grid gap-4">
+              <input
+                name="department"
+                placeholder="Department name"
+                className="h-11 rounded-2xl border border-[var(--glass-border)] bg-background px-3 text-sm"
+                required
+              />
+              <input
+                name="title"
+                placeholder="Program title"
+                className="h-11 rounded-2xl border border-[var(--glass-border)] bg-background px-3 text-sm"
+                required
+              />
+              <input
+                name="audience"
+                placeholder="Audience"
+                className="h-11 rounded-2xl border border-[var(--glass-border)] bg-background px-3 text-sm"
+                required
+              />
+              <textarea
+                name="description"
+                placeholder="Program description"
+                className="min-h-28 rounded-2xl border border-[var(--glass-border)] bg-background px-3 py-3 text-sm"
+                required
+              />
+              <input
+                name="starterModuleTitle"
+                placeholder="Starter module title"
+                className="h-11 rounded-2xl border border-[var(--glass-border)] bg-background px-3 text-sm"
+              />
+              <input
+                name="starterLessonTitle"
+                placeholder="Starter lesson title"
+                className="h-11 rounded-2xl border border-[var(--glass-border)] bg-background px-3 text-sm"
+              />
+              <textarea
+                name="starterLessonDescription"
+                placeholder="Starter lesson description"
+                className="min-h-24 rounded-2xl border border-[var(--glass-border)] bg-background px-3 py-3 text-sm"
+              />
+              <textarea
+                name="objectivesText"
+                placeholder="Objectives, one per line"
+                className="min-h-24 rounded-2xl border border-[var(--glass-border)] bg-background px-3 py-3 text-sm"
+              />
+              <textarea
+                name="keyTakeawaysText"
+                placeholder="Key takeaways, one per line"
+                className="min-h-24 rounded-2xl border border-[var(--glass-border)] bg-background px-3 py-3 text-sm"
+              />
+              <Button className="rounded-2xl">Create Department Program</Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-[2rem]">
+          <CardHeader>
+            <CardTitle>Add Module to Existing Program</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form action={addModuleToCourseAction} className="grid gap-4">
+              <select
+                name="courseId"
+                defaultValue={courses[0]?.courseId}
+                className="h-11 rounded-2xl border border-[var(--glass-border)] bg-background px-3 text-sm"
+              >
+                {courses.map((course) => (
+                  <option key={course.courseId} value={course.courseId}>
+                    {course.department} · {course.course.title}
+                  </option>
+                ))}
+              </select>
+              <input
+                name="department"
+                placeholder="Department label"
+                className="h-11 rounded-2xl border border-[var(--glass-border)] bg-background px-3 text-sm"
+                required
+              />
+              <input
+                name="title"
+                placeholder="Module title"
+                className="h-11 rounded-2xl border border-[var(--glass-border)] bg-background px-3 text-sm"
+                required
+              />
+              <input
+                name="estimatedMinutes"
+                type="number"
+                min="5"
+                defaultValue="20"
+                className="h-11 rounded-2xl border border-[var(--glass-border)] bg-background px-3 text-sm"
+                required
+              />
+              <textarea
+                name="description"
+                placeholder="Module description"
+                className="min-h-24 rounded-2xl border border-[var(--glass-border)] bg-background px-3 py-3 text-sm"
+                required
+              />
+              <input
+                name="lessonTitle"
+                placeholder="Initial lesson title"
+                className="h-11 rounded-2xl border border-[var(--glass-border)] bg-background px-3 text-sm"
+              />
+              <textarea
+                name="lessonDescription"
+                placeholder="Initial lesson description"
+                className="min-h-24 rounded-2xl border border-[var(--glass-border)] bg-background px-3 py-3 text-sm"
+              />
+              <textarea
+                name="objectivesText"
+                placeholder="Objectives, one per line"
+                className="min-h-24 rounded-2xl border border-[var(--glass-border)] bg-background px-3 py-3 text-sm"
+              />
+              <textarea
+                name="keyTakeawaysText"
+                placeholder="Key takeaways, one per line"
+                className="min-h-24 rounded-2xl border border-[var(--glass-border)] bg-background px-3 py-3 text-sm"
+              />
+              <Button className="rounded-2xl">Add Module</Button>
+            </form>
+          </CardContent>
+        </Card>
+      </section>
+
+      <Card className="rounded-[2rem]">
         <CardHeader>
-          <CardTitle>Content Administration Overview</CardTitle>
+          <CardTitle>Program Catalog</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 text-sm leading-6 text-slate-600">
+        <CardContent className="space-y-4 text-sm leading-6 text-muted-foreground">
           <p>
-            The onboarding app now renders from structured course data instead of hard-coded JSX
-            screens. The PPTX extraction artifact, curated course model, and source-slide mappings
-            live in the repo and are reflected throughout learner lessons and assessments.
+            Protected PPTX-derived programs are preserved as immutable source content. Manager-added
+            programs and modules are stored as extensions around that content instead of replacing
+            it.
           </p>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-3xl bg-slate-50 p-4">
-              <p className="font-medium text-slate-950">Course ID</p>
-              <p>{course.id}</p>
-            </div>
-            <div className="rounded-3xl bg-slate-50 p-4">
-              <p className="font-medium text-slate-950">Modules</p>
-              <p>{course.modules.length}</p>
-            </div>
-            <div className="rounded-3xl bg-slate-50 p-4">
-              <p className="font-medium text-slate-950">Final Questions</p>
-              <p>{course.finalAssessment?.questions.length ?? 0}</p>
-            </div>
-          </div>
         </CardContent>
       </Card>
 
       <div className="space-y-4">
-        {course.modules.map((module) => (
-          <Card key={module.id} className="rounded-[2rem] border-0 shadow-lg">
+        {courses.map((course) => (
+          <Card key={course.courseId} className="rounded-[2rem]">
             <CardHeader className="space-y-3">
               <div className="flex flex-wrap items-center gap-3">
-                <Badge className="rounded-full px-3 py-1">{module.estimatedMinutes} min</Badge>
-                <SourceSlideBadges sourceSlides={module.sourceSlides} />
+                <Badge className="rounded-full px-3 py-1">{course.department}</Badge>
+                <Badge variant="secondary" className="rounded-full px-3 py-1">
+                  {course.protected ? "Protected source" : "Manager created"}
+                </Badge>
+                <Badge variant="outline" className="rounded-full px-3 py-1">
+                  {course.source}
+                </Badge>
               </div>
-              <CardTitle className="text-2xl">{module.title}</CardTitle>
-              <p className="text-sm leading-6 text-slate-600">{module.description}</p>
+              <CardTitle className="text-2xl">{course.course.title}</CardTitle>
+              <p className="text-sm leading-6 text-muted-foreground">{course.course.description}</p>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {module.lessons.map((lesson) => (
-                <div key={lesson.id} className="rounded-3xl border border-slate-200 px-5 py-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <h3 className="font-semibold text-slate-950">{lesson.title}</h3>
-                      {lesson.description ? (
-                        <p className="mt-1 text-sm text-slate-600">{lesson.description}</p>
-                      ) : null}
-                    </div>
-                    <SourceSlideBadges sourceSlides={lesson.sourceSlides} />
-                  </div>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-4">
+                <div className="rounded-3xl border border-[var(--glass-border)] bg-foreground/5 p-4">
+                  <p className="font-medium text-foreground">Course ID</p>
+                  <p className="text-muted-foreground">{course.courseId}</p>
                 </div>
-              ))}
+                <div className="rounded-3xl border border-[var(--glass-border)] bg-foreground/5 p-4">
+                  <p className="font-medium text-foreground">Modules</p>
+                  <p className="text-muted-foreground">{course.course.modules.length}</p>
+                </div>
+                <div className="rounded-3xl border border-[var(--glass-border)] bg-foreground/5 p-4">
+                  <p className="font-medium text-foreground">Final Questions</p>
+                  <p className="text-muted-foreground">{course.course.finalAssessment?.questions.length ?? 0}</p>
+                </div>
+                <div className="rounded-3xl border border-[var(--glass-border)] bg-foreground/5 p-4">
+                  <p className="font-medium text-foreground">Source</p>
+                  <p className="text-muted-foreground">{course.protected ? course.extractionArtifact ?? "Protected content registry" : "Manager content store"}</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {course.course.modules.map((module) => (
+                  <div key={module.id} className="rounded-3xl border border-[var(--glass-border)] px-5 py-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <h3 className="font-semibold text-foreground">{module.title}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">{module.description}</p>
+                      </div>
+                      {module.sourceSlides.length ? (
+                        <SourceSlideBadges sourceSlides={module.sourceSlides} />
+                      ) : (
+                        <Badge variant="outline" className="rounded-full">
+                          Manager-authored
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         ))}

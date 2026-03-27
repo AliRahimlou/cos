@@ -8,25 +8,34 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import type { PortalTheme } from "@/lib/portal/theme";
+import { ThemeToggle } from "./theme-toggle";
 
 const initialState: LoginActionState = {
   error: null,
 };
 
-export function LoginForm() {
+type LoginFormProps = {
+  initialTheme: PortalTheme;
+};
+
+export function LoginForm({ initialTheme }: LoginFormProps) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 md:p-10">
+    <div className="min-h-screen bg-background p-6 md:p-10">
       <div className="mx-auto grid min-h-[85vh] max-w-6xl items-center gap-8 lg:grid-cols-2">
         <div>
-          <Badge className="mb-4 rounded-full bg-white/10 px-4 py-1 text-white hover:bg-white/10">
+          <div className="mb-6 flex justify-end lg:hidden">
+            <ThemeToggle initialTheme={initialTheme} />
+          </div>
+          <Badge className="mb-4 rounded-full border border-[var(--glass-border)] bg-foreground/10 px-4 py-1 text-foreground hover:bg-foreground/15">
             Internal Onboarding + Training
           </Badge>
-          <h1 className="max-w-3xl text-4xl font-semibold leading-tight text-white md:text-6xl">
+          <h1 className="max-w-3xl text-4xl font-semibold leading-tight text-foreground md:text-6xl">
             The COS onboarding app with real routing, dashboards, and manager oversight.
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300">
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
             Learners land on a real overview instead of a modules-only page. Managers get team
             analytics, user controls, and shared progress visibility backed by a server store.
           </p>
@@ -40,7 +49,7 @@ export function LoginForm() {
             ].map((item) => (
               <div
                 key={item}
-                className="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100"
+                className="glass-surface rounded-3xl p-4 text-sm text-foreground/90"
               >
                 {item}
               </div>
@@ -48,14 +57,19 @@ export function LoginForm() {
           </div>
         </div>
 
-        <Card className="rounded-[2rem] border-0 shadow-2xl">
+        <Card className="rounded-[2rem] shadow-[var(--glass-shadow-lg)]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-2xl">Employee Login</CardTitle>
+            <div className="flex items-center justify-between gap-3">
+              <CardTitle className="text-2xl">Employee Login</CardTitle>
+              <div className="hidden lg:block">
+                <ThemeToggle initialTheme={initialTheme} />
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="space-y-5">
             <form action={formAction} className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-slate-700">
+                <label htmlFor="email" className="text-sm font-medium text-foreground/80">
                   Work email
                 </label>
                 <Input
@@ -69,7 +83,7 @@ export function LoginForm() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-slate-700">
+                <label htmlFor="password" className="text-sm font-medium text-foreground/80">
                   Password
                 </label>
                 <Input
@@ -84,7 +98,7 @@ export function LoginForm() {
               </div>
 
               {state.error ? (
-                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                   {state.error}
                 </div>
               ) : null}
@@ -96,30 +110,30 @@ export function LoginForm() {
             </form>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-900">
+              <div className="glass-surface rounded-3xl p-4">
+                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
                   <UserRound className="h-4 w-4" />
                   Learner demo
                 </div>
-                <p className="text-sm text-slate-600">`learner@cos.local`</p>
-                <p className="text-sm text-slate-600">`learner123`</p>
+                <p className="text-sm text-muted-foreground">`learner@cos.local`</p>
+                <p className="text-sm text-muted-foreground">`learner123`</p>
               </div>
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-900">
+              <div className="glass-surface rounded-3xl p-4">
+                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
                   <ShieldCheck className="h-4 w-4" />
                   Manager demo
                 </div>
-                <p className="text-sm text-slate-600">`manager@cos.local`</p>
-                <p className="text-sm text-slate-600">`manager123`</p>
+                <p className="text-sm text-muted-foreground">`manager@cos.local`</p>
+                <p className="text-sm text-muted-foreground">`manager123`</p>
               </div>
             </div>
 
-            <div className="rounded-3xl bg-slate-950 p-5 text-white">
-              <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+            <div className="glass-surface-strong rounded-3xl p-5">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
                 <Building2 className="h-4 w-4" />
                 Seeded demo environment
               </div>
-              <p className="text-sm leading-6 text-slate-300">
+              <p className="text-sm leading-6 text-muted-foreground">
                 The repo now seeds a shared local portal store with manager and learner accounts so
                 dashboards, analytics, and progress controls are reachable without external setup.
               </p>

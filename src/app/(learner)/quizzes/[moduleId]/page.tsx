@@ -3,7 +3,7 @@ import { Lock } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { AssessmentScreen } from "@/components/portal/assessment-screen";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireSessionUser } from "@/lib/auth/session";
 import { findModule, getBestAssessmentAttempt } from "@/lib/onboarding/progress";
@@ -63,6 +63,7 @@ export default async function ModuleQuizPage({
 
   return (
     <AssessmentScreen
+      courseId={course.id}
       assessment={courseModule.quiz}
       assessmentType="module_quiz"
       moduleId={courseModule.id}

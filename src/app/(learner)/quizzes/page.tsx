@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Lock } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireSessionUser } from "@/lib/auth/session";
 import { getBestAssessmentAttempt, getModuleStatus } from "@/lib/onboarding/progress";
@@ -34,7 +34,7 @@ export default async function QuizzesPage() {
         );
 
         return (
-          <Card key={module.id} className="rounded-[2rem] border-0 shadow-lg">
+          <Card key={module.id} className="rounded-[2rem]">
             <CardHeader className="space-y-3">
               <div className="flex items-center justify-between gap-4">
                 <CardTitle className="text-xl">{module.title} Quiz</CardTitle>
@@ -42,12 +42,12 @@ export default async function QuizzesPage() {
                   {module.quiz.questions.length} questions
                 </Badge>
               </div>
-              <p className="text-sm leading-6 text-slate-600">
+              <p className="text-sm leading-6 text-muted-foreground">
                 {module.quiz.description}
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-2 text-sm text-slate-600">
+              <div className="grid gap-2 text-sm text-muted-foreground">
                 <div className="flex items-center justify-between">
                   <span>Passing score</span>
                   <span>{module.quiz.passingScore}%</span>
