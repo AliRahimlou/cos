@@ -25,6 +25,5 @@ export const config = {
     "/assessment/:path*",
     "/results/:path*",
     "/manager/:path*",
-    "/onboarding/sales-rep/:path*",
   ],
 };

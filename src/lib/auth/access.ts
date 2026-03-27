@@ -6,7 +6,6 @@ const LEARNER_PREFIXES = [
   "/quizzes",
   "/assessment",
   "/results",
-  "/onboarding/sales-rep",
 ] as const;
 
 const MANAGER_PREFIXES = ["/manager"] as const;

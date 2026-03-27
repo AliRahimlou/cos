@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useActionState } from "react";
 import { ArrowRight, Building2, ShieldCheck, UserRound } from "lucide-react";
 
 import { loginAction, type LoginActionState } from "@/app/actions/auth";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,9 +29,20 @@ export function LoginForm({ initialTheme }: LoginFormProps) {
           <div className="mb-6 flex justify-end lg:hidden">
             <ThemeToggle initialTheme={initialTheme} />
           </div>
-          <Badge className="mb-4 rounded-full border border-[var(--glass-border)] bg-foreground/10 px-4 py-1 text-foreground hover:bg-foreground/15">
-            Creative Office Solutions
-          </Badge>
+          <div className="mb-6 inline-flex max-w-full flex-col gap-3">
+            <Image
+              src="/onboarding/sales-rep/deck-assets/slide-01-1-image1.png"
+              alt="Creative Office Solutions"
+              width={244}
+              height={91}
+              className="h-auto w-[220px] max-w-full"
+              priority
+            />
+            <div className="h-px w-full bg-border/80" />
+            <p className="pl-1 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              Learning Portal
+            </p>
+          </div>
           <h1 className="max-w-3xl text-4xl font-semibold leading-tight text-foreground md:text-6xl">
             Welcome to the COS learning and onboarding portal.
           </h1>

@@ -27,7 +27,6 @@ describe("auth access helpers", () => {
   it("blocks learners from manager routes and managers from learner routes", () => {
     expect(resolveProtectedRedirect("/manager", "learner")).toBe("/dashboard");
     expect(resolveProtectedRedirect("/training", "manager")).toBe("/manager");
-    expect(resolveProtectedRedirect("/onboarding/sales-rep", "manager")).toBe("/manager");
   });
 
   it("allows users onto the correct side of the app", () => {
